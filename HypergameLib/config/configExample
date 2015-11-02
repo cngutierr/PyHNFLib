@@ -1,0 +1,88 @@
+Name: Terrorist Example
+Situation Names: [Lone Actor, Bomber, Cland. Cell, Cbt. Cell, Desp. Cell, Unspec]
+Row Action Names: [FFQ, FFC, FFQ + P, FFC + P, FFC++]
+Column Action Names: [Fire, Fire + A, Fire + B, Fire++]
+Row Belief:
+   - Situation Name: Lone Actor
+     Current Belief: 0.6
+     Belief for Column Action:
+       Fire: 0.8
+       Fire + A: 0.0
+       Fire + B: 0.2
+       Fire++: 0.0
+
+   - Situation Name: Bomber
+     Current Belief: 0.1
+     Belief for Column Action:
+       Fire: 0.1
+       Fire + A: 0.0
+       Fire + B: 0.9
+       Fire++: 0.0
+
+   - Situation Name: Cland. Cell
+     Current Belief: 0.2
+     Belief for Column Action:
+       Fire: 0.9
+       Fire + A: 0.1
+       Fire + B: 0.0
+       Fire++: 0.0
+
+   - Situation Name: Cbt. Cell
+     Current Belief: 0.1
+     Belief for Column Action:
+       Fire: 0.2
+       Fire + A: 0.7
+       Fire + B: 0.05
+       Fire++: 0.05
+
+   - Situation Name: Desp. Cell
+     Current Belief: 0.0
+     Belief for Column Action:
+       Fire: 0.0
+       Fire + A: 0.1
+       Fire + B: 0.5
+       Fire++: 0.4
+
+   - Situation Name: Unspec
+     Current Belief: 0.0
+     Belief for Column Action:
+       Fire: 0.0
+       Fire + A: 0.0
+       Fire + B: 0.0
+       Fire++: 1.0
+
+Row Action Cost:
+  - Row Action: FFQ
+    Cost for Column Actions:
+      Fire: -1.0
+      Fire + A: -5.0
+      Fire + B: -5.0
+      Fire++: -5.0
+
+  - Row Action: FFC
+    Cost for Column Actions:
+      Fire: -2.0
+      Fire + A: -3.0
+      Fire + B: -3.0
+      Fire++: -4.0
+      
+  - Row Action: FFQ + P
+    Cost for Column Actions:
+      Fire: -2.0
+      Fire + A: -3.0
+      Fire + B: -4.0
+      Fire++: -4.0
+      
+  - Row Action: FFC + P
+    Cost for Column Actions:
+      Fire: -2.0
+      Fire + A: -3.0
+      Fire + B: -3.0
+      Fire++: -3.0
+
+  - Row Action: FFC++
+    Cost for Column Actions:
+      Fire: -2.0
+      Fire + A: -3.0
+      Fire + B: -2.0
+      Fire++: -3.0
