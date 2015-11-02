@@ -54,6 +54,7 @@ class HNFCreator(object):
             self.HNFOut.calcExpectedUtility()
             self.HNFOut.calcHypergameExpectedUtility()
             self.HNFOut.heuPlotOverUncertainty()
+            self.HNFOut.getWorstCaseAction("FFC")
             self.HNFOut.printHNFTable()
     
     def __initFromFile(self):
@@ -292,7 +293,18 @@ class HNF(object):
         self.bestCaseEU = {"rowActionName": bestCaseEUKey,\
                            self.__EU:self.expectedUtility[bestCaseEUKey]}
     
+    def getWorstCaseAction(self, rowActionName):
+        '''
+        DESC: get the worst case outcome for a given row action.
+        INPUT: A row action name
+        OUTPUT: A dictionary with the name of the column action and the untility
+        '''
+        #check to see if the row action name is valid
+        assert rowActionName in self.rowActionNames
+        return min(self.costs.loc[rowActionName])
+
         
+        #select the 
     def calcHypergameExpectedUtility(self):
         '''
         DESC: Calculates the hypergame expected utility.
@@ -300,7 +312,7 @@ class HNF(object):
         for rowActionName in self.rowActionNames:
             self.hypergameExpectedUtility[rowActionName]=(1.0-self.uncertainty)\
                     * self.expectedUtility[rowActionName] + self.uncertainty\
-                    * self.worstCaseEU[self.__EU]
+                    * self.getWorstCaseAction(rowActionName)
                     
     def printHNFTable(self):
         '''
@@ -371,6 +383,7 @@ class HNF(object):
         plt.legend()
         plt.show()
         self.uncertainty = oldUncertainty
+        
     def __verifyAllEntries(self):
         '''
         DESC: Make sure that all the entries are set before we start to
