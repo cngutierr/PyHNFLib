@@ -8,10 +8,13 @@ import HypergameLib
 
 class Test(unittest.TestCase):
 
-    def test_HNFCreator(self):
+    def test_HNFCreator_(self):
         HNFCreator = HypergameLib.HNFCreator("../../config/configExample")
         self.assertTrue(HNFCreator.settings["Name"] == "Terrorist Example", "Unable to Parse Name")
-        
+    
+    def test_HNFCreator_DesertStorm(self):
+        HNFCreator = HypergameLib.HNFCreator("../../config/DesertStormSettings")
+        self.assertTrue(HNFCreator.settings["Name"] == "Desert Storm Example", "Unable to Parse Name")
     def test_HNF_constructor(self):
         sitName = ["Lone Actor", "Bomber", "Cland. Cell", "Cbt Cell", "Desp. Cell", "Unspe"]
         rowName = ["FFQ", "FFC", "FFQ + P", "FFC + P", "FFC++"]

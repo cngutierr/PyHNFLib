@@ -1,0 +1,90 @@
+Name: Desert Storm Example
+Situation Names: [3x3 Subgame, 6x6 Subgame, Comb]
+Row Action Names: [Attack, Attack Right, Attack Left, Envelop Left, Invade Beach, Envelop Vertically]
+Column Action Names: [Defender, Defend Left, Defend Right, w/Reserve, Screen, Counter Attack]
+Row Belief:
+   - Situation Name: 3x3 Subgame
+     Current Belief: 0.8
+     Belief for Column Action:
+       Defender: 1.0
+       Defend Left: 0.0
+       Defend Right: 0.0
+       w/Reserve: 0.0
+       Screen: 0.0
+       Counter Attack: 0.0
+       
+   - Situation Name: 6x6 Subgame
+     Current Belief: 0.2
+     Belief for Column Action:
+       Defender: 0.0
+       Defend Left: 0.125
+       Defend Right: 0.25
+       w/Reserve: 0.0
+       Screen: 0.625
+       Counter Attack: 0.0
+
+   - Situation Name: Comb
+     Current Belief: 0.0
+     Belief for Column Action:
+       Defender: 0.8
+       Defend Left: 0.025
+       Defend Right: 0.05
+       w/Reserve: 0.0
+       Screen: 0.125
+       Counter Attack: 0.0
+
+Row Action Cost:
+   - Row Action: Attack
+     Cost for Column Actions:
+       Defender: -1.0
+       Defend Left: -1.0
+       Defend Right: -1.0
+       w/Reserve: 1.0
+       Screen: 1.0
+       Counter Attack: 4.0
+
+   - Row Action: Attack Right
+     Cost for Column Actions:
+       Defender: -1.0
+       Defend Left: -3.0
+       Defend Right: 0.0
+       w/Reserve: 1.0
+       Screen: 1.0
+       Counter Attack: 1.0
+
+
+   - Row Action: Attack Left
+     Cost for Column Actions:
+       Defender: -1.0
+       Defend Left: -3.0
+       Defend Right: 0.0
+       w/Reserve: 1.0
+       Screen: 1.0
+       Counter Attack: 1.0
+      
+   - Row Action: Envelop Left
+     Cost for Column Actions:
+       Defender: 3.0
+       Defend Left: 5.0
+       Defend Right: 1.0
+       w/Reserve: 2.0
+       Screen: -1.0
+       Counter Attack: -2.0
+ 
+   - Row Action: Invade Beach
+     Cost for Column Actions:
+       Defender: 1.0
+       Defend Left: -3.0
+       Defend Right: 2.0
+       w/Reserve: -1.0
+       Screen: -1.0
+       Counter Attack: -2.0     
+
+   - Row Action: Envelop Vertically
+     Cost for Column Actions:
+       Defender: 2.0
+       Defend Left: 0.0
+       Defend Right: 0.0
+       w/Reserve: -3.0
+       Screen: -2.0
+       Counter Attack: -1.0     
