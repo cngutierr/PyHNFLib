@@ -1,5 +1,5 @@
 Name: Desert Storm Example
-Situation Names: [3x3 Subgame, 6x6 Subgame, Comb]
+Situation Names: [3x3 Subgame, 6x6 Subgame]
 Row Action Names: [Attack, Attack Right, Attack Left, Envelop Left, Invade Beach, Envelop Vertically]
 Column Action Names: [Defender, Defend Left, Defend Right, w/Reserve, Screen, Counter Attack]
 Row Belief:
@@ -23,15 +23,6 @@ Row Belief:
        Screen: 0.625
        Counter Attack: 0.0
 
-   - Situation Name: Comb
-     Current Belief: 0.0
-     Belief for Column Action:
-       Defender: 0.8
-       Defend Left: 0.025
-       Defend Right: 0.05
-       w/Reserve: 0.0
-       Screen: 0.125
-       Counter Attack: 0.0
 
 Row Action Cost:
    - Row Action: Attack
