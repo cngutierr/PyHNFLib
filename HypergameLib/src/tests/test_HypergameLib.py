@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
                        .getHNFInstance()
         TerroristHNF.displayHNF()
         
-        self.assertTrue(TerroristHNF.HNFName == "Terrorist Example", \
+        self.assertTrue(TerroristHNF.HNFName == "Terrorist Example",
                                                 "Unable to Parse name")
         
     def test_HNFCreator_DesertStorm(self):
@@ -26,12 +26,12 @@ class Test(unittest.TestCase):
         DESC
             Display the HNF info created from file
         '''
-        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings")\
-                              .getHNFInstance()
+        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").getHNFInstance()
         DesertStormHNF.displayHNF()
-        self.assertTrue(DesertStormHNF.HNFName == "Desert Storm Example", \
-                                                "Unable to Parse name")
-        
+        self.assertTrue(DesertStormHNF.HNFName == "Desert Storm Example",
+                        "Unable to Parse name")
+        DesertStormHNF.gambitGames
+
         
     def _test_HNF_constructor(self):
         sitName = ["Lone Actor", "Bomber", "Cland. Cell", "Cbt Cell", "Desp. Cell", "Unspe"]
@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         hg.setSituationalBeliefs("Fire + A", sbFireA)
         hg.setSituationalBeliefs("Fire + B", sbFireB)
         hg.setSituationalBeliefs("Fire++", sbFirePP)
-        
+
         tmp =dict(zip(sitName,[0.6, 0.1, 0.2, 0.1, 0.0, 0.0]))
         hg.setCurrentBelief(tmp)
         hg.initSummaryBelief()
