@@ -47,8 +47,8 @@ Row Action Cost:
    - Row Action: Attack Left
      Cost for Column Actions:
        Defender: -1.0
-       Defend Left: -3.0
-       Defend Right: 0.0
+       Defend Left: 0.0
+       Defend Right: -3.0
        w/Reserve: 1.0
        Screen: 1.0
        Counter Attack: 1.0

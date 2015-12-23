@@ -5,11 +5,12 @@ from HypergameLib import HNF
 
 
 class MyTestCase(unittest.TestCase):
-    def test_DesertStorm(self):
+    def test_DesertStorm_hardcoded(self):
         """
         Hand crafted test for Desert Storm Example.
         :return:
         """
+        print "DESERT STORM EXAMPLE"
         g = gambit.Game.new_table([6, 6])
         g.title = "Desert Storm Hypergame"
         g.players[0].label = "Attacker"
@@ -114,6 +115,7 @@ class MyTestCase(unittest.TestCase):
         print "solver"
         solver = gambit.nash.ExternalLogitSolver()
         s = solver.solve(g)
+        print s
         self.assertAlmostEqual(s[0][0], 0.1250004426696509, places=20, msg="NEMS did not match")
         self.assertAlmostEqual(s[0][1], 0.49999948506171976, places=20, msg="NEMS did not match")
         self.assertAlmostEqual(s[0][3], 0.37500007226862936, places=20, msg="NEMS did not match")
@@ -140,11 +142,15 @@ class MyTestCase(unittest.TestCase):
                 self.assertTrue(columnAction in actions_in_gambit,
                                 "Column action not found in gambit game")
 
-
-
             for col_ind, colName in enumerate(DesertStormHNF.columnActionNames):
                 for row_ind, rowName in enumerate(DesertStormHNF.rowActionNames):
                     self.assertEqual(float(game[row_ind, col_ind][0]), DesertStormHNF.costs[colName][rowName])
+
+            print "Calc the NEMS"
+            solver = gambit.nash.ExternalLogitSolver()
+            s = solver.solve(game)
+
+            pass
 
 if __name__ == '__main__':
     unittest.main()
