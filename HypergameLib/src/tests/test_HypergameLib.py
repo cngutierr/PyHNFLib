@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         '''
         TerroristHNF = HNF.HNFFactory("../../config/configExample")\
                        .getHNFInstance()
-        TerroristHNF.displayHNF()
+        TerroristHNF.display_hnf()
         
         self.assertTrue(TerroristHNF.HNFName == "Terrorist Example",
                                                 "Unable to Parse name")
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
             Display the HNF info created from file
         '''
         DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").getHNFInstance()
-        DesertStormHNF.displayHNF()
+        DesertStormHNF.display_hnf()
         self.assertTrue(DesertStormHNF.HNFName == "Desert Storm Example",
                         "Unable to Parse name")
         DesertStormHNF.gambitGames
@@ -44,26 +44,26 @@ class Test(unittest.TestCase):
         ffqpCost = dict(zip(columnName,[-2, -3, -4, -4]))
         ffcpCost = dict(zip(columnName,[-2, -3, -3, -3]))
         ffcppCost = dict(zip(columnName,[-2, -3, -2, -3]))
-        hg.setCostsByAction("FFQ", ffqCost)
-        hg.setCostsByAction("FFC", ffcCost)
-        hg.setCostsByAction("FFQ + P", ffqpCost)
-        hg.setCostsByAction("FFC + P", ffcpCost)
-        hg.setCostsByAction("FFC++", ffcppCost)
+        hg.set_costs_by_action("FFQ", ffqCost)
+        hg.set_costs_by_action("FFC", ffcCost)
+        hg.set_costs_by_action("FFQ + P", ffqpCost)
+        hg.set_costs_by_action("FFC + P", ffcpCost)
+        hg.set_costs_by_action("FFC++", ffcppCost)
 
         sbFire = dict(zip(sitName,[0.8, 0.1, 0.9, 0.2, 0.0, 0.0]))
         sbFireA = dict(zip(sitName,[0.0, 0.0, 0.1, 0.7, 0.1, 0.0]))
         sbFireB = dict(zip(sitName,[0.2, 0.9, 0.0, 0.05, 0.5, 0.0]))
         sbFirePP = dict(zip(sitName,[0.0, 0.0, 0.0, 0.05, 0.4, 1.0]))
-        hg.setSituationalBeliefs("Fire", sbFire)
-        hg.setSituationalBeliefs("Fire + A", sbFireA)
-        hg.setSituationalBeliefs("Fire + B", sbFireB)
-        hg.setSituationalBeliefs("Fire++", sbFirePP)
+        hg.set_situational_beliefs("Fire", sbFire)
+        hg.set_situational_beliefs("Fire + A", sbFireA)
+        hg.set_situational_beliefs("Fire + B", sbFireB)
+        hg.set_situational_beliefs("Fire++", sbFirePP)
 
         tmp =dict(zip(sitName,[0.6, 0.1, 0.2, 0.1, 0.0, 0.0]))
         hg.set_current_belief(tmp)
-        hg.initSummaryBelief()
-        hg.initExpectedUtility()
-        hg.printHNFTable()
+        hg.init_summary_belief()
+        hg.init_expected_utility()
+        hg.print_hnf_table()
         pass
 
 

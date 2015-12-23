@@ -124,7 +124,7 @@ class MyTestCase(unittest.TestCase):
             Display the HNF info created from file
         """
         DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").getHNFInstance()
-        DesertStormHNF.displayHNF()
+        DesertStormHNF.display_hnf()
         for i, game in enumerate(DesertStormHNF.gambitGames):
             self.assertEqual(game.players[0].label, "Row Player", "Labels are incorrect")
             self.assertEqual(game.players[1].label, "Column Player", "Labels are incorrect")

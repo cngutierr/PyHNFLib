@@ -59,10 +59,10 @@ class HNF(object):
                 self.__initFromFile()
 
                 # calc the summary and expected utility
-                self.HNFOut.initSummaryBelief()
-                self.HNFOut.initExpectedUtility()
-                self.HNFOut.calcHypergameExpectedUtility()
-                self.HNFOut.calcModelingOpponentUtility()
+                self.HNFOut.init_summary_belief()
+                self.HNFOut.init_expected_utility()
+                self.HNFOut.calc_hypergame_expected_utility()
+                self.HNFOut.calc_modeling_opponent_utility()
 
 
         def getHNFInstance(self):
@@ -87,8 +87,8 @@ class HNF(object):
                            self.settings[HNF.Consts.ROW_ACTION_COST])
             # set cost values
             for costRow in costRows:
-                self.HNFOut.setCostsByAction(costRow[HNF.Consts.ROW_ACTION],
-                                             costRow[HNF.Consts.COST_COL_ACTIONS])
+                self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
+                                                costRow[HNF.Consts.COST_COL_ACTIONS])
 
             # Gambit games -- each belief context will be modeled as a sep gambit game
             for situation in self.HNFOut.situationNames:
@@ -105,8 +105,8 @@ class HNF(object):
                              self.settings[HNF.Consts.ROW_BELIEF])
             # set belief values
             for beliefRow in beliefRows:
-                self.HNFOut.setSituationalBeliefs(beliefRow[HNF.Consts.SIT_NAME],
-                                                  beliefRow[HNF.Consts.BELIEF_COL_ACTIONS])
+                self.HNFOut.set_situational_beliefs(beliefRow[HNF.Consts.SIT_NAME],
+                                                    beliefRow[HNF.Consts.BELIEF_COL_ACTIONS])
 
         def __setCurrentBelief(self):
             """
@@ -207,7 +207,7 @@ class HNF(object):
             for key in updatedCurrentBeilefDict.keys():
                 self.currentBelief[key] = updatedCurrentBeilefDict[key]
 
-        def setCostsByAction(self, actionName, updatedDict):
+        def set_costs_by_action(self, actionName, updatedDict):
             """
             DESC:
                 Set the cost for a given action. The action can be either a row or a
@@ -231,7 +231,7 @@ class HNF(object):
                 for k in updatedDict.keys():
                     self.costs[actionName][k] = updatedDict[k]
 
-        def setSituationalBeliefs(self, name, updatedDict):
+        def set_situational_beliefs(self, name, updatedDict):
             """
             DESC:
                 Set the situational beliefs for a given situation name or column
@@ -257,7 +257,7 @@ class HNF(object):
                 for k in updatedDict.keys():
                     self.situationalBeliefs[name][k] = updatedDict[k]
 
-        def setUncertainty(self, uncertainty):
+        def set_uncertainty(self, uncertainty):
             """
             DESC
                 Set the uncertainty value (duh)
@@ -265,15 +265,15 @@ class HNF(object):
             """
             self.uncertainty = uncertainty
 
-        def initSummaryBelief(self):
+        def init_summary_belief(self):
             """
             DESC
                 Calculate the summary belief from Current Belief and Situational
                 Beliefs.
             """
             # asset that all the values are in place
-            self.__verifySituationalBeliefs()
-            self.__verifyCurrentBeliefs()
+            self.__verify_situational_beliefs()
+            self.__verify_current_beliefs()
 
             for columnActionName in self.columnActionNames:
                 tmpSum = 0.0
@@ -283,17 +283,17 @@ class HNF(object):
                 self.summaryBeliefs[columnActionName] = round(tmpSum, self.ROUND_DEC)
 
             # make the summary belief is valid
-            self.__verifySummaryBelief()
+            self.__verify_summary_belief()
 
-        def initExpectedUtility(self):
+        def init_expected_utility(self):
             """
             DESC
                 calculate the expected utility. Summary belief, current belief,
                 and situational beliefs must all be set before calling this func
             """
-            self.__verifySummaryBelief()
-            self.__verifyCurrentBeliefs()
-            self.__verifySituationalBeliefs()
+            self.__verify_summary_belief()
+            self.__verify_current_beliefs()
+            self.__verify_situational_beliefs()
             for rowActionName in self.rowActionNames:
                 tmpSum = 0.0
                 for columnActionName in self.columnActionNames:
@@ -302,19 +302,19 @@ class HNF(object):
                 self.expectedUtility[rowActionName] = round(tmpSum, self.ROUND_DEC)
 
             # now that we have EUs, update the best and worst EU vars
-            self.__setBestWorstEU()
+            self.__set_best_worst_eu()
 
-        def calcHypergameExpectedUtility(self):
+        def calc_hypergame_expected_utility(self):
             """
             DESC: Calculates the hypergame expected utility.
             """
             for rowActionName in self.rowActionNames:
                 self.hypergameExpectedUtility[rowActionName] = (1.0 - self.uncertainty) \
                                                                * self.expectedUtility[rowActionName] + self.uncertainty \
-                                                                                                       * self.__getWorstCaseAction(
+                                                                                                       * self.__get_worst_case_action(
                     rowActionName)
 
-        def calcModelingOpponentUtility(self):
+        def calc_modeling_opponent_utility(self):
             """
             DESC
                 Calculating the MO
@@ -332,8 +332,7 @@ class HNF(object):
         #    2. MO for ALL row actions
         #    3. Best HEU for
 
-
-        def printHNFTable(self):
+        def print_hnf_table(self):
             """
             DESC: Prints the Hypergame Normal Form table as seen in R. Vane's work.
             """
@@ -372,17 +371,17 @@ class HNF(object):
             #    (self.worstCaseEU[HNF.Consts.ROW_ACT_NAME], \
             #        self.worstCaseEU[HNF.Consts.EU])
 
-        def displayHNF(self):
+        def display_hnf(self):
             """
             DESC
                 Display the HNF table and uncertainty plot
             OUTPUT
                 Text to the console showing the table and a matplot
             """
-            self.heuPlotOverUncertainty()
-            self.printHNFTable()
+            self.heu_plot_over_uncertainty()
+            self.print_hnf_table()
 
-        def heuPlotOverUncertainty(self, step=0.1):
+        def heu_plot_over_uncertainty(self, step=0.1):
             """
             DESC: Plot the uncertainty from 0.0 to 1.0 given a step
             :param step:
@@ -393,8 +392,8 @@ class HNF(object):
             heuOverTime = dict.fromkeys(self.rowActionNames, [])
             moOverTime = dict.fromkeys(self.rowActionNames, [])
             for uncertainty in np.arange(0.0, 1.1, step):
-                self.setUncertainty(uncertainty)
-                self.calcHypergameExpectedUtility()
+                self.set_uncertainty(uncertainty)
+                self.calc_hypergame_expected_utility()
                 # save the HEU for each action
                 for rowActionName in self.rowActionNames:
                     heuOverTime[rowActionName] = heuOverTime[rowActionName] + \
@@ -410,16 +409,16 @@ class HNF(object):
             plt.show()
             self.uncertainty = oldUncertainty
 
-        def __verifyAllEntries(self):
+        def __verify_all_entries(self):
             """
             DESC: Make sure that all the entries are set before we start to
                   calculate HEU, etc.
             """
-            self.__verifyCurrentBeliefs()
-            self.__verifySituationalBeliefs()
-            self.__verifySummaryBelief()
+            self.__verify_current_beliefs()
+            self.__verify_situational_beliefs()
+            self.__verify_summary_belief()
 
-        def __verifySummaryBelief(self):
+        def __verify_summary_belief(self):
             """
             DESC:
                 verify that the summary belief adds up to 1.0
@@ -427,7 +426,7 @@ class HNF(object):
             assert sum(self.summaryBeliefs.values()) >= 0.99 \
                    and sum(self.summaryBeliefs.values()) <= 1.0
 
-        def __verifySituationalBeliefs(self):
+        def __verify_situational_beliefs(self):
             """
             DESC:
                 Verify that the situation belief is valid. The rows should always
@@ -436,7 +435,7 @@ class HNF(object):
             for situation in self.situationNames:
                 assert sum(self.situationalBeliefs.loc[situation]) == 1.0
 
-        def __verifyCurrentBeliefs(self):
+        def __verify_current_beliefs(self):
             """
             DESC:
                 Verify that the current belief is valid. The sum of current belief
@@ -445,7 +444,7 @@ class HNF(object):
             assert sum(self.currentBelief.values()) >= 0.99 \
                    and sum(self.currentBelief.values()) <= 1.0
 
-        def __setBestWorstEU(self):
+        def __set_best_worst_eu(self):
             """
             DESC: Set the best expected utility and the worst expected utility
             """
@@ -459,7 +458,7 @@ class HNF(object):
             self.bestCaseEU = {"rowActionName": bestCaseEUKey, \
                                HNF.Consts.EU: self.expectedUtility[bestCaseEUKey]}
 
-        def __getWorstCaseAction(self, rowActionName):
+        def __get_worst_case_action(self, rowActionName):
             """
             DESC
                 get the worst case outcome for a given row action.
@@ -476,9 +475,9 @@ class HNF(object):
             g = gambit.Game.new_table([len(self.rowActionNames), len(self.columnActionNames)])
             g.title = situation
             g.players[0].label = "Row Player"
-            self.__set_gambit_actions(g, 0, self.rowActionNames)
+            self.__set_gambit_actions(g, 0)
             g.players[1].label = "Column Player"
-            self.__set_gambit_actions(g, 1, self.columnActionNames)
+            self.__set_gambit_actions(g, 1)
 
             for col_ind, col_name in enumerate(self.columnActionNames):
                 for row_ind, row_name in enumerate(self.rowActionNames):
@@ -486,11 +485,17 @@ class HNF(object):
                     # hack for now
                     g[row_ind, col_ind][1] = int(-1 * self.costs[col_name][row_name])
 
-
             return g
 
-        @staticmethod
-        def __set_gambit_actions(g, player_index, action_names):
+        def __set_gambit_actions(self, g, player_index):
+            assert player_index == 0 or player_index == 1
+            # row player
+            if player_index == 0:
+                action_names = self.rowActionNames
+            # column player
+            else:
+                action_names = self.columnActionNames
+
             for i, rowAction in enumerate(action_names):
                 g.players[player_index].strategies[i].label = rowAction
 
