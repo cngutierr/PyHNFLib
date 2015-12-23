@@ -1,8 +1,8 @@
-'''
+"""
 Created on Oct 31, 2015
 
 @author: Christopher Gutierrez
-'''
+"""
 import gambit
 import pandas as pd
 import texttable as tt
@@ -64,17 +64,15 @@ class HNF(object):
                 self.HNFOut.calcHypergameExpectedUtility()
                 self.HNFOut.calcModelingOpponentUtility()
 
-                # set the gambit object with all info found in file
-                self.HNFOut.initGambit()
 
         def getHNFInstance(self):
             return self.HNFOut
 
         def __initFromFile(self):
-            '''
-            DESC: extracts all the settings found in the config file and inits 
+            """
+            DESC: extracts all the settings found in the config file and inits
                 the HNF object.
-            '''
+            """
             self.__setCosts()
             self.__setBeliefs()
             self.__setCurrentBelief()
@@ -89,11 +87,12 @@ class HNF(object):
                            self.settings[HNF.Consts.ROW_ACTION_COST])
             # set cost values
             for costRow in costRows:
-                self.HNFOut.setCosts(costRow[HNF.Consts.ROW_ACTION],
-                                     costRow[HNF.Consts.COST_COL_ACTIONS])
+                self.HNFOut.setCostsByAction(costRow[HNF.Consts.ROW_ACTION],
+                                             costRow[HNF.Consts.COST_COL_ACTIONS])
 
+            # Gambit games -- each belief context will be modeled as a sep gambit game
             for situation in self.HNFOut.situationNames:
-                self.HNFOut.gambitGames.append(self.HNFOut.set_gambit_game(situation))
+                self.HNFOut.append_gambit_game(situation)
 
 
         def __setBeliefs(self):
@@ -117,16 +116,16 @@ class HNF(object):
             currentBeliefs = dict(map(lambda r: (r[HNF.Consts.SIT_NAME], r[HNF.Consts.CUR_BELIEF]),
                                       self.settings[HNF.Consts.ROW_BELIEF]))
             # set current beliefs
-            self.HNFOut.setCurrentBelief(currentBeliefs)
+            self.HNFOut.set_current_belief(currentBeliefs)
 
     class HNFInstance(object):
-        '''
+        """
         Hypergame Normal Form Class
         Should contain the following
         A belief context matrix
         A payoff matrix
         A situational belief matrix
-        '''
+        """
 
         # round the the nearest thousandth deceimal place
         ROUND_DEC = 5
@@ -186,22 +185,21 @@ class HNF(object):
             # set gambit object
             self.gambitGames = list()
 
-
             # init constants
             self.HNFName = name
             self.uncertainty = uncertainty
             self.bestCaseEU = None
             self.worstCaseEU = None
 
-        def setCurrentBelief(self, updatedCurrentBeilefDict):
-            '''
-            DESC: 
+        def set_current_belief(self, updatedCurrentBeilefDict):
+            """
+            DESC:
                 Set the current belief values.
             INPUT:
-                updatedCurrentBeilefDict (dict) - a dictionary with keys equal to 
+                updatedCurrentBeilefDict (dict) - a dictionary with keys equal to
                 situation name and values summing up to 1.
                 :param updatedCurrentBeilefDict:
-            '''
+            """
             assert type(updatedCurrentBeilefDict) is dict
             assert set(updatedCurrentBeilefDict.keys()) == set(self.situationNames)
             assert 0.99 <= sum(updatedCurrentBeilefDict.values()) <= 1.0
@@ -209,7 +207,7 @@ class HNF(object):
             for key in updatedCurrentBeilefDict.keys():
                 self.currentBelief[key] = updatedCurrentBeilefDict[key]
 
-        def setCosts(self, actionName, updatedDict):
+        def setCostsByAction(self, actionName, updatedDict):
             """
             DESC:
                 Set the cost for a given action. The action can be either a row or a
@@ -234,19 +232,19 @@ class HNF(object):
                     self.costs[actionName][k] = updatedDict[k]
 
         def setSituationalBeliefs(self, name, updatedDict):
-            '''
+            """
             DESC:
-                Set the situational beliefs for a given situation name or column 
+                Set the situational beliefs for a given situation name or column
                 action name.
             INPUT:
                 name (str) - the name of the situation or the name of the row action
                     to be updated.
                 updateDict (dict) - a dictionary with the updated values. The keys
                     must be row situation names or column action names and the values
-                    should be the probabilities.  
+                    should be the probabilities.
                     :param name:
                     :param updatedDict:
-            '''
+            """
             assert type(updatedDict) is dict
             assert name in self.situationNames or \
                    name in self.columnActionNames
@@ -260,19 +258,19 @@ class HNF(object):
                     self.situationalBeliefs[name][k] = updatedDict[k]
 
         def setUncertainty(self, uncertainty):
-            '''
+            """
             DESC
                 Set the uncertainty value (duh)
                 :param uncertainty:
-            '''
+            """
             self.uncertainty = uncertainty
 
         def initSummaryBelief(self):
-            '''
+            """
             DESC
                 Calculate the summary belief from Current Belief and Situational
                 Beliefs.
-            '''
+            """
             # asset that all the values are in place
             self.__verifySituationalBeliefs()
             self.__verifyCurrentBeliefs()
@@ -288,11 +286,11 @@ class HNF(object):
             self.__verifySummaryBelief()
 
         def initExpectedUtility(self):
-            '''
+            """
             DESC
                 calculate the expected utility. Summary belief, current belief,
                 and situational beliefs must all be set before calling this func
-            '''
+            """
             self.__verifySummaryBelief()
             self.__verifyCurrentBeliefs()
             self.__verifySituationalBeliefs()
@@ -307,9 +305,9 @@ class HNF(object):
             self.__setBestWorstEU()
 
         def calcHypergameExpectedUtility(self):
-            '''
+            """
             DESC: Calculates the hypergame expected utility.
-            '''
+            """
             for rowActionName in self.rowActionNames:
                 self.hypergameExpectedUtility[rowActionName] = (1.0 - self.uncertainty) \
                                                                * self.expectedUtility[rowActionName] + self.uncertainty \
@@ -317,12 +315,12 @@ class HNF(object):
                     rowActionName)
 
         def calcModelingOpponentUtility(self):
-            '''
+            """
             DESC
                 Calculating the MO
                 MO = MAX_k(S_j * u_{j,k} ) for j = 1 to n
                 for column j and row k
-            '''
+            """
             for rowActionName in self.rowActionNames:
                 self.modelingOpponentUtility[rowActionName] = \
                     max(map(lambda i: self.summaryBeliefs[i] * \
@@ -336,9 +334,9 @@ class HNF(object):
 
 
         def printHNFTable(self):
-            '''
+            """
             DESC: Prints the Hypergame Normal Form table as seen in R. Vane's work.
-            '''
+            """
             mainTab = tt.Texttable(max_width=160)
             heuTab = tt.Texttable()
 
@@ -375,20 +373,20 @@ class HNF(object):
             #        self.worstCaseEU[HNF.Consts.EU])
 
         def displayHNF(self):
-            '''
+            """
             DESC
                 Display the HNF table and uncertainty plot
             OUTPUT
                 Text to the console showing the table and a matplot
-            '''
+            """
             self.heuPlotOverUncertainty()
             self.printHNFTable()
 
         def heuPlotOverUncertainty(self, step=0.1):
-            '''
+            """
             DESC: Plot the uncertainty from 0.0 to 1.0 given a step
             :param step:
-            '''
+            """
             # save the current uncertainty and restore it after we plot it
             oldUncertainty = self.uncertainty
             # init hypergame expected utility
@@ -413,44 +411,44 @@ class HNF(object):
             self.uncertainty = oldUncertainty
 
         def __verifyAllEntries(self):
-            '''
+            """
             DESC: Make sure that all the entries are set before we start to
                   calculate HEU, etc.
-            '''
+            """
             self.__verifyCurrentBeliefs()
             self.__verifySituationalBeliefs()
             self.__verifySummaryBelief()
 
         def __verifySummaryBelief(self):
-            '''
-            DESC: 
+            """
+            DESC:
                 verify that the summary belief adds up to 1.0
-            '''
+            """
             assert sum(self.summaryBeliefs.values()) >= 0.99 \
                    and sum(self.summaryBeliefs.values()) <= 1.0
 
         def __verifySituationalBeliefs(self):
-            '''
+            """
             DESC:
                 Verify that the situation belief is valid. The rows should always
-                add up to 1. 
-            '''
+                add up to 1.
+            """
             for situation in self.situationNames:
                 assert sum(self.situationalBeliefs.loc[situation]) == 1.0
 
         def __verifyCurrentBeliefs(self):
-            '''
+            """
             DESC:
-                Verify that the current belief is valid. The sum of current belief 
+                Verify that the current belief is valid. The sum of current belief
                 values should be 1.0.
-            '''
+            """
             assert sum(self.currentBelief.values()) >= 0.99 \
                    and sum(self.currentBelief.values()) <= 1.0
 
         def __setBestWorstEU(self):
-            '''
+            """
             DESC: Set the best expected utility and the worst expected utility
-            '''
+            """
             # set the worst case expected util
             worstCaseEUKey = min(self.expectedUtility, key=self.expectedUtility.get)
             self.worstCaseEU = {HNF.Consts.ROW_ACT_NAME: worstCaseEUKey, \
@@ -474,11 +472,7 @@ class HNF(object):
             assert rowActionName in self.rowActionNames
             return min(self.costs.loc[rowActionName])
 
-        def initGambit(self):
-
-            pass
-
-        def set_gambit_game(self, situation):
+        def create_gambit_game(self, situation):
             g = gambit.Game.new_table([len(self.rowActionNames), len(self.columnActionNames)])
             g.title = situation
             g.players[0].label = "Row Player"
@@ -499,3 +493,12 @@ class HNF(object):
         def __set_gambit_actions(g, player_index, action_names):
             for i, rowAction in enumerate(action_names):
                 g.players[player_index].strategies[i].label = rowAction
+
+        def append_gambit_game(self, situation):
+            """
+            For a given situation name (str), append the approrate gambit object
+            into self.gambitGames.
+            :param situation:
+            :return:
+            """
+            self.gambitGames.append(self.create_gambit_game(situation))
