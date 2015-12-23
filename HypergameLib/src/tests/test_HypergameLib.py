@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         tmp =dict(zip(sitName,[0.6, 0.1, 0.2, 0.1, 0.0, 0.0]))
         hg.set_current_belief(tmp)
         hg.init_summary_belief()
-        hg.init_expected_utility()
+        hg.situation_expected_utility()
         hg.print_hnf_table()
         pass
 

@@ -127,7 +127,7 @@ class MyTestCase(unittest.TestCase):
         """
         DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").getHNFInstance()
         DesertStormHNF.display_hnf()
-        for i, game in enumerate(DesertStormHNF.gambitGames):
+        for i, game in enumerate(DesertStormHNF.gambitGames.values()):
             self.assertEqual(game.players[0].label, "Row Player", "Labels are incorrect")
             self.assertEqual(game.players[1].label, "Column Player", "Labels are incorrect")
 

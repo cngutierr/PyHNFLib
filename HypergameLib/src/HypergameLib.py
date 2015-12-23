@@ -60,10 +60,11 @@ class HNF(object):
 
                 # calc the summary and expected utility
                 self.HNFOut.init_summary_belief()
-                self.HNFOut.init_expected_utility()
-                self.HNFOut.calc_hypergame_expected_utility()
-                self.HNFOut.calc_modeling_opponent_utility()
 
+                # setup the output stuff
+                #self.HNFOut.situation_expected_utility()
+                #self.HNFOut.calc_hypergame_expected_utility()
+                #self.HNFOut.calc_modeling_opponent_utility()
 
         def getHNFInstance(self):
             return self.HNFOut
@@ -93,7 +94,6 @@ class HNF(object):
             # Gambit games -- each belief context will be modeled as a sep gambit game
             for situation in self.HNFOut.situationNames:
                 self.HNFOut.append_gambit_game(situation)
-
 
         def __setBeliefs(self):
             """
@@ -174,22 +174,20 @@ class HNF(object):
             self.summaryBeliefs = dict.fromkeys(columnActionNames, 0.0)
 
             # init expected utility
-            self.expectedUtility = dict.fromkeys(rowActionNames, 0.0)
+            # self.expectedUtility = dict.fromkeys(rowActionNames, 0.0)
 
             # init hypergame expected utility
-            self.hypergameExpectedUtility = dict.fromkeys(rowActionNames, 0.0)
+            # self.hypergameExpectedUtility = dict.fromkeys(rowActionNames, 0.0)
 
             # init MO utility
-            self.modelingOpponentUtility = dict.fromkeys(rowActionNames, 0.0)
+            # self.modelingOpponentUtility = dict.fromkeys(rowActionNames, 0.0)
 
             # set gambit object
-            self.gambitGames = list()
+            self.gambitGames = dict()
 
             # init constants
             self.HNFName = name
             self.uncertainty = uncertainty
-            self.bestCaseEU = None
-            self.worstCaseEU = None
 
         def set_current_belief(self, updatedCurrentBeilefDict):
             """
@@ -285,7 +283,7 @@ class HNF(object):
             # make the summary belief is valid
             self.__verify_summary_belief()
 
-        def init_expected_utility(self):
+        def situation_expected_utility(self, situation=""):
             """
             DESC
                 calculate the expected utility. Summary belief, current belief,
@@ -294,76 +292,84 @@ class HNF(object):
             self.__verify_summary_belief()
             self.__verify_current_beliefs()
             self.__verify_situational_beliefs()
+
+            expected_utility = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
-                tmpSum = 0.0
+                tmp_sum = 0.0
                 for columnActionName in self.columnActionNames:
-                    tmpSum += self.summaryBeliefs[columnActionName] * \
-                              self.costs[columnActionName][rowActionName]
-                self.expectedUtility[rowActionName] = round(tmpSum, self.ROUND_DEC)
+                    tmp_sum += self.summaryBeliefs[columnActionName] * \
+                               self.costs[columnActionName][rowActionName]
+                expected_utility[rowActionName] = round(tmp_sum, self.ROUND_DEC)
+            return expected_utility
 
-            # now that we have EUs, update the best and worst EU vars
-            self.__set_best_worst_eu()
-
-        def calc_hypergame_expected_utility(self):
+        def calc_hypergame_expected_utility(self, expected_util):
             """
-            DESC: Calculates the hypergame expected utility.
+            Calculates the hypergame expected utility.
+            :param expected_util: the expected utility function that will be transformed into a HEU vector
+                                  as descrbied in "PLANNING FOR TERRORIST-CAUSED EMERGENCIES"
+            :return: the HEU calculated from the expected utility value
             """
+            heu = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
-                self.hypergameExpectedUtility[rowActionName] = (1.0 - self.uncertainty) \
-                                                               * self.expectedUtility[rowActionName] + self.uncertainty \
-                                                                                                       * self.__get_worst_case_action(
-                    rowActionName)
+                heu[rowActionName] = (1.0 - self.uncertainty) *\
+                                     expected_util[rowActionName] +\
+                                     self.uncertainty *\
+                                     self.__get_worst_case_action(rowActionName)
+            return heu
 
         def calc_modeling_opponent_utility(self):
             """
-            DESC
-                Calculating the MO
+            Calculates the modeling oppenent utility value as defined below:
                 MO = MAX_k(S_j * u_{j,k} ) for j = 1 to n
                 for column j and row k
+            as described in "Using Hypergames to Select Plans in Adversarial Environments" by Vane et al
+            :return: the modeling opponent expected values for each action
             """
+            mo_expected_util = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
-                self.modelingOpponentUtility[rowActionName] = \
-                    max(map(lambda i: self.summaryBeliefs[i] * \
-                                      self.costs.loc[rowActionName][i], self.columnActionNames))
-            print self.modelingOpponentUtility
+                mo_expected_util[rowActionName] = \
+                    max(map(lambda i: self.summaryBeliefs[i] *
+                            self.costs.loc[rowActionName][i],
+                            self.columnActionNames))
+            return mo_expected_util
 
         # The following is need:
         #    1. HEU for ALL row actions
         #    2. MO for ALL row actions
         #    3. Best HEU for
 
-        def print_hnf_table(self):
+        def print_hnf_table(self, expected_util):
             """
-            DESC: Prints the Hypergame Normal Form table as seen in R. Vane's work.
+            Prints the Hypergame Normal Form table as seen in R. Vane's work.
             """
-            mainTab = tt.Texttable(max_width=160)
-            heuTab = tt.Texttable()
+            main_tab = tt.Texttable(max_width=160)
+            heu_tab = tt.Texttable()
 
-            firstRow = ["Current Belief", "Summary Belief"]
-            firstRow.extend(self.summaryBeliefs.values())
-            mainOutTable = [firstRow]
+            first_row = ["Current Belief", "Summary Belief"]
+            first_row.extend(self.summaryBeliefs.values())
+            main_out_table = [first_row]
 
             # top half of table
             for situationName in self.situationNames:
-                tmpRow = [self.currentBelief[situationName], situationName]
-                tmpRow.extend(self.situationalBeliefs.loc[situationName])
-                mainOutTable.append(tmpRow)
+                tmp_row = [self.currentBelief[situationName], situationName]
+                tmp_row.extend(self.situationalBeliefs.loc[situationName])
+                main_out_table.append(tmp_row)
 
             middleRow = ["Current EU", " "]
             middleRow.extend(self.columnActionNames)
-            mainOutTable.append(middleRow)
+            main_out_table.append(middleRow)
 
             # bottom half of table
             for rowActionName in self.rowActionNames:
-                tmpRow = [self.expectedUtility[rowActionName], rowActionName]
-                tmpRow.extend(self.costs.loc[rowActionName])
-                mainOutTable.append(tmpRow)
+                tmp_row = [expected_util[rowActionName], rowActionName]
+                tmp_row.extend(self.costs.loc[rowActionName])
+                main_out_table.append(tmp_row)
 
-            mainTab.add_rows(mainOutTable, header=False)
-            heuTab.header(["Row Action Name", "HEU"])
+            main_tab.add_rows(main_out_table, header=False)
+            heu_tab.header(["Row Action Name", "HEU"])
             print "Name: " + self.HNFName
             print "Uncertainty: %f" % self.uncertainty
-            print mainTab.draw()
+            print main_tab.draw()
             # print "Best expected utility: (%s, %0.2f)" % \
             #    (self.bestCaseEU[HNF.Consts.ROW_ACT_NAME], \
             #            self.bestCaseEU[HNF.Consts.EU])
@@ -379,35 +385,42 @@ class HNF(object):
                 Text to the console showing the table and a matplot
             """
             self.heu_plot_over_uncertainty()
-            self.print_hnf_table()
+            self.print_hnf_table(self.situation_expected_utility())
 
-        def heu_plot_over_uncertainty(self, step=0.1):
+        def calculate_results(self):
+
+            pass
+
+        def heu_plot_over_uncertainty(self, situation="", step=0.1):
             """
             DESC: Plot the uncertainty from 0.0 to 1.0 given a step
             :param step:
             """
             # save the current uncertainty and restore it after we plot it
-            oldUncertainty = self.uncertainty
+            old_uncertainty = self.uncertainty
             # init hypergame expected utility
-            heuOverTime = dict.fromkeys(self.rowActionNames, [])
-            moOverTime = dict.fromkeys(self.rowActionNames, [])
+            heu_over_time = dict.fromkeys(self.rowActionNames, [])
+            mo_over_time = dict.fromkeys(self.rowActionNames, [])
+
+            # iterate over the uncertainty range. For each step, update the eu
             for uncertainty in np.arange(0.0, 1.1, step):
                 self.set_uncertainty(uncertainty)
-                self.calc_hypergame_expected_utility()
+                eu = self.situation_expected_utility(situation)
+                heu = self.calc_hypergame_expected_utility(eu)
                 # save the HEU for each action
                 for rowActionName in self.rowActionNames:
-                    heuOverTime[rowActionName] = heuOverTime[rowActionName] + \
-                                                 [self.hypergameExpectedUtility[rowActionName]]
+                    heu_over_time[rowActionName] = heu_over_time[rowActionName] + \
+                                                 [heu[rowActionName]]
 
             for rowActionName in self.rowActionNames:
-                plt.plot(np.arange(0.0, 1.1, step), heuOverTime[rowActionName], label=rowActionName)
+                plt.plot(np.arange(0.0, 1.1, step), heu_over_time[rowActionName], label=rowActionName)
 
             plt.title("Hypergame Expected Utility over uncertainty")
             plt.xlabel("Uncertainty")
             plt.ylabel("Hypergame Expected Utility")
             plt.legend()
             plt.show()
-            self.uncertainty = oldUncertainty
+            self.uncertainty = old_uncertainty
 
         def __verify_all_entries(self):
             """
@@ -423,8 +436,7 @@ class HNF(object):
             DESC:
                 verify that the summary belief adds up to 1.0
             """
-            assert sum(self.summaryBeliefs.values()) >= 0.99 \
-                   and sum(self.summaryBeliefs.values()) <= 1.0
+            assert 0.99 <= sum(self.summaryBeliefs.values()) <= 1.0
 
         def __verify_situational_beliefs(self):
             """
@@ -443,20 +455,6 @@ class HNF(object):
             """
             assert sum(self.currentBelief.values()) >= 0.99 \
                    and sum(self.currentBelief.values()) <= 1.0
-
-        def __set_best_worst_eu(self):
-            """
-            DESC: Set the best expected utility and the worst expected utility
-            """
-            # set the worst case expected util
-            worstCaseEUKey = min(self.expectedUtility, key=self.expectedUtility.get)
-            self.worstCaseEU = {HNF.Consts.ROW_ACT_NAME: worstCaseEUKey, \
-                                HNF.Consts.EU: self.expectedUtility[worstCaseEUKey]}
-
-            # set the best case expected util
-            bestCaseEUKey = max(self.expectedUtility, key=self.expectedUtility.get)
-            self.bestCaseEU = {"rowActionName": bestCaseEUKey, \
-                               HNF.Consts.EU: self.expectedUtility[bestCaseEUKey]}
 
         def __get_worst_case_action(self, rowActionName):
             """
@@ -506,4 +504,15 @@ class HNF(object):
             :param situation:
             :return:
             """
-            self.gambitGames.append(self.create_gambit_game(situation))
+            self.gambitGames[situation] = self.create_gambit_game(situation)
+
+        def calc_nems_expected_util(self, situation):
+            game = self.gambitGames[situation]
+            solver = gambit.nash.ExternalLogitSolver()
+            s = solver.solve(game)
+            nems_eu = s[:len(self.rowActionNames)]
+            return nems_eu
+
+        def calc_nems_expected_value(self, expected_util):
+
+            pass
