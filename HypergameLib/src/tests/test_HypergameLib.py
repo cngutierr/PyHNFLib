@@ -9,7 +9,7 @@ from HypergameLib import HNF
 
 class Test(unittest.TestCase):
 
-    def test_HNFCreator_TerroristExample(self):
+    def _test_HNFCreator_TerroristExample(self):
         '''
         DESC
             Display the HNF info created from file
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         self.assertTrue(TerroristHNF.HNFName == "Terrorist Example",
                                                 "Unable to Parse name")
         
-    def test_HNFCreator_DesertStorm(self):
+    def _test_HNFCreator_DesertStorm(self):
         '''
         DESC
             Display the HNF info created from file
@@ -32,7 +32,17 @@ class Test(unittest.TestCase):
                         "Unable to Parse name")
         DesertStormHNF.gambitGames
 
-        
+    def test_HNFCreator_SimpleOPM(self):
+        '''
+        DESC
+            Display the HNF info created from file
+        '''
+        DesertStormHNF = HNF.HNFFactory("../../config/SimpleOPM").getHNFInstance()
+        DesertStormHNF.display_hnf()
+        self.assertTrue(DesertStormHNF.HNFName == "Simple OPM Example",
+                        "Unable to Parse name")
+        DesertStormHNF.gambitGames
+
     def _test_HNF_constructor(self):
         sitName = ["Lone Actor", "Bomber", "Cland. Cell", "Cbt Cell", "Desp. Cell", "Unspe"]
         rowName = ["FFQ", "FFC", "FFQ + P", "FFC + P", "FFC++"]

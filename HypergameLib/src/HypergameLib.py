@@ -78,6 +78,10 @@ class HNF(object):
             self.__setBeliefs()
             self.__setCurrentBelief()
 
+            # Gambit games -- each belief context will be modeled as a sep gambit game
+            for situation in self.HNFOut.situationNames:
+                self.HNFOut.append_gambit_game(situation)
+
         def __setCosts(self):
             """
             DESC: extracts cost from settings file and sets the cost in the HNF
@@ -91,9 +95,6 @@ class HNF(object):
                 self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
                                                 costRow[HNF.Consts.COST_COL_ACTIONS])
 
-            # Gambit games -- each belief context will be modeled as a sep gambit game
-            for situation in self.HNFOut.situationNames:
-                self.HNFOut.append_gambit_game(situation)
 
         def __setBeliefs(self):
             """
@@ -276,8 +277,9 @@ class HNF(object):
             for columnActionName in self.columnActionNames:
                 tmpSum = 0.0
                 for situationName in self.situationNames:
-                    tmpSum += self.currentBelief[situationName] * \
-                              self.situationalBeliefs[columnActionName][situationName]
+                    if self.situationalBeliefs[columnActionName][situationName] != "X":
+                        tmpSum += self.currentBelief[situationName] * \
+                                  self.situationalBeliefs[columnActionName][situationName]
                 self.summaryBeliefs[columnActionName] = round(tmpSum, self.ROUND_DEC)
 
             # make the summary belief is valid
@@ -445,7 +447,8 @@ class HNF(object):
                 add up to 1.
             """
             for situation in self.situationNames:
-                assert sum(self.situationalBeliefs.loc[situation]) == 1.0
+                filterList = [item for item in self.situationalBeliefs.loc[situation] if item != 'X']
+                assert 0.99999 <= sum(filterList) <= 1.00001
 
         def __verify_current_beliefs(self):
             """
@@ -470,14 +473,15 @@ class HNF(object):
             return min(self.costs.loc[rowActionName])
 
         def create_gambit_game(self, situation):
-            g = gambit.Game.new_table([len(self.rowActionNames), len(self.columnActionNames)])
+            colLen = len([item for item in self.situationalBeliefs.loc[situation] if item != "X"])
+            g = gambit.Game.new_table([len(self.rowActionNames), colLen])
             g.title = situation
             g.players[0].label = "Row Player"
-            self.__set_gambit_actions(g, 0)
+            self.__set_gambit_actions(g, 0, situation)
             g.players[1].label = "Column Player"
-            self.__set_gambit_actions(g, 1)
+            colActionNames = self.__set_gambit_actions(g, 1, situation)
 
-            for col_ind, col_name in enumerate(self.columnActionNames):
+            for col_ind, col_name in enumerate(colActionNames):
                 for row_ind, row_name in enumerate(self.rowActionNames):
                     g[row_ind, col_ind][0] = int(self.costs[col_name][row_name])
                     # hack for now
@@ -485,17 +489,22 @@ class HNF(object):
 
             return g
 
-        def __set_gambit_actions(self, g, player_index):
+        def __set_gambit_actions(self, g, player_index, situation):
             assert player_index == 0 or player_index == 1
             # row player
             if player_index == 0:
                 action_names = self.rowActionNames
             # column player
             else:
-                action_names = self.columnActionNames
+                action_names = list()
+                for colActionName in self.columnActionNames:
+                    if self.situationalBeliefs.loc[situation][colActionName] != "X":
+                        action_names.append(colActionName)
+                #action_names = self.columnActionNames
 
-            for i, rowAction in enumerate(action_names):
-                g.players[player_index].strategies[i].label = rowAction
+            for i, actionName in enumerate(action_names):
+                g.players[player_index].strategies[i].label = actionName
+            return action_names
 
         def append_gambit_game(self, situation):
             """

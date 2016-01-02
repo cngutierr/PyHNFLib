@@ -120,6 +120,38 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(s[0][1], 0.49999948506171976, places=20, msg="NEMS did not match")
         self.assertAlmostEqual(s[0][3], 0.37500007226862936, places=20, msg="NEMS did not match")
 
+    def test_simpleOPM(self):
+        """
+        DESC
+            Display the HNF info created from file
+        """
+        simple_opm = HNF.HNFFactory("../../config/SimpleOPM").getHNFInstance()
+        simple_opm.display_hnf()
+        for i, game in enumerate(simple_opm.gambitGames.values()):
+            self.assertEqual(game.players[0].label, "Row Player", "Labels are incorrect")
+            self.assertEqual(game.players[1].label, "Column Player", "Labels are incorrect")
+
+            # get all the names of the strategies/actions
+            actions_in_gambit = [i.label for i in game.strategies]
+
+            # check that the actions in HNF and gambit match
+            for rowAction in simple_opm.rowActionNames:
+                self.assertTrue(rowAction in actions_in_gambit,
+                                "Row action not found in gambit game")
+            #for columnAction in simple_opm.columnActionNames:
+            #    self.assertTrue(columnAction in actions_in_gambit,
+            #                    "Column action not found in gambit game")
+
+            #for col_ind, colName in enumerate(simple_opm.columnActionNames):
+            #    for row_ind, rowName in enumerate(simple_opm.rowActionNames):
+            #        self.assertEqual(float(game[row_ind, col_ind][0]), simple_opm.costs[colName][rowName])
+
+            print "Calc the NEMS"
+            solver = gambit.nash.ExternalLogitSolver()
+            s = solver.solve(game)
+            print s
+            pass
+
     def test_DesertStorm(self):
         """
         DESC
@@ -149,7 +181,10 @@ class MyTestCase(unittest.TestCase):
             print "Calc the NEMS"
             solver = gambit.nash.ExternalLogitSolver()
             s = solver.solve(game)
-
+            self.assertAlmostEqual(s[0][0], 0.125, 3, msg="NEMS does not match expectation")
+            self.assertAlmostEqual(s[0][1], 0.5, 1, msg="NEMS does not match expectation")
+            self.assertAlmostEqual(s[0][2], 0.0, 1, msg="NEMS does not match expectation")
+            self.assertAlmostEqual(s[0][3], 0.375, 3, msg="NEMS does not match expectation")
             pass
 
 if __name__ == '__main__':

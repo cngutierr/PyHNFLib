@@ -23,7 +23,6 @@ Row Belief:
        Screen: 0.625
        Counter Attack: 0.0
 
-
 Row Action Cost:
    - Row Action: Attack
      Cost for Column Actions:

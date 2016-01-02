@@ -1,0 +1,50 @@
+Name: Simple OPM Example
+Situation Names: [Naive Attacker, Aware Attacker, Full Knowledge]
+Row Action Names: [Low Resource Deception, High Resource Deception, No Deception]
+Column Action Names: [Exfil Blind, Exfil Low, Exfil High, No Exfil]
+Row Belief:
+   - Situation Name: Naive Attacker
+     Current Belief: 0.7
+     Belief for Column Action:
+       Exfil Blind: 0.9
+       Exfil Low: 0.1
+       Exfil High: X
+       No Exfil: X
+       
+   - Situation Name: Aware Attacker
+     Current Belief: 0.2
+     Belief for Column Action:
+       Exfil Blind: X
+       Exfil Low: 0.9
+       Exfil High: X
+       No Exfil: 0.1
+
+   - Situation Name: Full Knowledge
+     Current Belief: 0.1
+     Belief for Column Action:
+       Exfil Blind: 0.0
+       Exfil Low: 0.3
+       Exfil High: 0.6
+       No Exfil: 0.1
+
+Row Action Cost:
+   - Row Action: Low Resource Deception
+     Cost for Column Actions:
+       Exfil Blind: 2.0
+       Exfil Low: 0.0
+       Exfil High: -1.0
+       No Exfil: 2.0
+
+   - Row Action: High Resource Deception
+     Cost for Column Actions:
+       Exfil Blind: 1.0
+       Exfil Low: 2.0
+       Exfil High: 0.0
+       No Exfil: 1.0
+
+   - Row Action: No Deception
+     Cost for Column Actions:
+       Exfil Blind: -2.0
+       Exfil Low: -2.0
+       Exfil High: -2.0
+       No Exfil: 2.0
