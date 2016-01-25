@@ -54,35 +54,75 @@ Row Belief:
 Row Action Cost:
   - Row Action: FFQ
     Cost for Column Actions:
-      Fire: -1.0
-      Fire + A: -5.0
-      Fire + B: -5.0
-      Fire++: -5.0
+      Fire:
+        row_cost: -1.0
+        col_cost: 1.0
+      Fire + A:
+        row_cost: -5.0
+        col_cost: 5.0
+      Fire + B:
+        row_cost: -5.0
+        col_cost: 5.0
+      Fire++:
+        row_cost: -5.0
+        col_cost: 5.0
 
   - Row Action: FFC
     Cost for Column Actions:
-      Fire: -2.0
-      Fire + A: -3.0
-      Fire + B: -3.0
-      Fire++: -4.0
+      Fire:
+        row_cost: -2.0
+        col_cost: 2.0
+      Fire + A:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire + B:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire++:
+        row_cost: -4.0
+        col_cost: 4.0
       
   - Row Action: FFQ + P
     Cost for Column Actions:
-      Fire: -2.0
-      Fire + A: -3.0
-      Fire + B: -4.0
-      Fire++: -4.0
+      Fire:
+        row_cost: -2.0
+        col_cost: 2.0
+      Fire + A:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire + B:
+        row_cost: -4.0
+        col_cost: 4.0
+      Fire++:
+        row_cost: -4.0
+        col_cost: 4.0
       
   - Row Action: FFC + P
     Cost for Column Actions:
-      Fire: -2.0
-      Fire + A: -3.0
-      Fire + B: -3.0
-      Fire++: -3.0
+      Fire:
+        row_cost: -2.0
+        col_cost: 2.0
+      Fire + A:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire + B:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire++:
+        row_cost: -3.0
+        col_cost: 3.0
 
   - Row Action: FFC++
     Cost for Column Actions:
-      Fire: -2.0
-      Fire + A: -3.0
-      Fire + B: -2.0
-      Fire++: -3.0
+      Fire:
+        row_cost: -2.0
+        col_cost: 2.0
+      Fire + A:
+        row_cost: -3.0
+        col_cost: 3.0
+      Fire + B:
+        row_cost: -2.0
+        col_cost: 2.0
+      Fire++:
+        row_cost: -3.0
+        col_cost: 3.0

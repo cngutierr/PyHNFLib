@@ -30,21 +30,45 @@ Row Belief:
 Row Action Cost:
    - Row Action: Low Resource Deception
      Cost for Column Actions:
-       Exfil Blind: 2.0
-       Exfil Low: 0.0
-       Exfil High: -1.0
-       No Exfil: 2.0
+       Exfil Blind:
+            row_cost: 2.0
+            col_cost: -2.0
+       Exfil Low:
+            row_cost: 0.0
+            col_cost: 0.0
+       Exfil High:
+            row_cost: -1.0
+            col_cost: 1.0
+       No Exfil:
+            row_cost: 2.0
+            col_cost: -2.0
 
    - Row Action: High Resource Deception
      Cost for Column Actions:
-       Exfil Blind: 1.0
-       Exfil Low: 2.0
-       Exfil High: 0.0
-       No Exfil: 1.0
+       Exfil Blind:
+            row_cost: 1.0
+            col_cost: -1.0
+       Exfil Low:
+            row_cost: 2.0
+            col_cost: -2.0
+       Exfil High:
+            row_cost: 0.0
+            col_cost: 0.0
+       No Exfil:
+            row_cost: 1.0
+            col_cost: -1.0
 
    - Row Action: No Deception
      Cost for Column Actions:
-       Exfil Blind: -2.0
-       Exfil Low: -2.0
-       Exfil High: -2.0
-       No Exfil: 2.0
+       Exfil Blind:
+            row_cost: -2.0
+            col_cost: 2.0
+       Exfil Low:
+            row_cost: -2.0
+            col_cost: 2.0
+       Exfil High:
+            row_cost: -2.0
+            col_cost: 12.0
+       No Exfil:
+            row_cost: 2.0
+            col_cost: -2.0

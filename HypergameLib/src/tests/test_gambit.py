@@ -176,7 +176,7 @@ class MyTestCase(unittest.TestCase):
 
             for col_ind, colName in enumerate(DesertStormHNF.columnActionNames):
                 for row_ind, rowName in enumerate(DesertStormHNF.rowActionNames):
-                    self.assertEqual(float(game[row_ind, col_ind][0]), DesertStormHNF.costs[colName][rowName])
+                    self.assertEqual(float(game[row_ind, col_ind][0]), DesertStormHNF.costs_row[colName][rowName])
 
             print "Calc the NEMS"
             solver = gambit.nash.ExternalLogitSolver()

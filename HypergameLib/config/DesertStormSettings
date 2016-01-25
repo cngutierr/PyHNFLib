@@ -26,55 +26,126 @@ Row Belief:
 Row Action Cost:
    - Row Action: Attack
      Cost for Column Actions:
-       Defender: -1.0
-       Defend Left: -1.0
-       Defend Right: -1.0
-       w/Reserve: 1.0
-       Screen: 1.0
-       Counter Attack: 4.0
+       Defender:
+            row_cost: -1.0
+            col_cost: 1.0
+       Defend Left:
+            row_cost: -1.0
+            col_cost: 1.0
+       Defend Right:
+            row_cost: -1.0
+            col_cost: 1.0
+       w/Reserve:
+            row_cost: 1.0
+            col_cost: -1.0
+       Screen:
+            row_cost: 1.0
+            col_cost: -1.0
+       Counter Attack:
+            row_cost: 4.0
+            col_cost: -4.0
 
    - Row Action: Attack Right
      Cost for Column Actions:
-       Defender: -1.0
-       Defend Left: -3.0
-       Defend Right: 0.0
-       w/Reserve: 1.0
-       Screen: 1.0
-       Counter Attack: 1.0
-
+       Defender:
+             row_cost: -1.0
+             col_cost: 1.0
+       Defend Left:
+            row_cost: -3.0
+            col_cost: 3.0
+       Defend Right:
+            row_cost: 0.0
+            col_cost: 0.0
+       w/Reserve:
+            row_cost: 1.0
+            col_cost: -1.0
+       Screen:
+            row_cost: 1.0
+            col_cost: -1.0
+       Counter Attack:
+            row_cost: 1.0
+            col_cost: -1.0
 
    - Row Action: Attack Left
      Cost for Column Actions:
-       Defender: -1.0
-       Defend Left: 0.0
-       Defend Right: -3.0
-       w/Reserve: 1.0
-       Screen: 1.0
-       Counter Attack: 1.0
-      
+       Defender:
+            row_cost: -1.0
+            col_cost: 1.0
+       Defend Left:
+            row_cost: 0.0
+            col_cost: 0.0
+       Defend Right:
+            row_cost: -3.0
+            col_cost: 3.0
+       w/Reserve:
+            row_cost: 1.0
+            col_cost: -1.0
+       Screen:
+            row_cost: 1.0
+            col_cost: -1.0
+       Counter Attack:
+            row_cost: 1.0
+            col_cost: -1.0
+
    - Row Action: Envelop Left
      Cost for Column Actions:
-       Defender: 3.0
-       Defend Left: 5.0
-       Defend Right: 1.0
-       w/Reserve: 2.0
-       Screen: -1.0
-       Counter Attack: -2.0
- 
+       Defender:
+            row_cost: 3.0
+            col_cost: -3.0
+       Defend Left:
+            row_cost: 5.0
+            col_cost: -5.0
+       Defend Right:
+            row_cost: 1.0
+            col_cost: -1.0
+       w/Reserve:
+            row_cost: 2.0
+            col_cost: -2.0
+       Screen:
+            row_cost: -1.0
+            col_cost: 1.0
+       Counter Attack:
+            row_cost: -2.0
+            col_cost: 2.0
+
    - Row Action: Invade Beach
      Cost for Column Actions:
-       Defender: 1.0
-       Defend Left: -3.0
-       Defend Right: 2.0
-       w/Reserve: -1.0
-       Screen: -1.0
-       Counter Attack: -2.0     
+       Defender:
+            row_cost: 1.0
+            col_cost: -1.0
+       Defend Left:
+            row_cost: -3.0
+            col_cost: 3.0
+       Defend Right:
+            row_cost: 2.0
+            col_cost: -2.0
+       w/Reserve:
+            row_cost: -1.0
+            col_cost: 1.0
+       Screen:
+            row_cost: -1.0
+            col_cost: 1.0
+       Counter Attack:
+            row_cost: -2.0
+            col_cost: 2.0
 
    - Row Action: Envelop Vertically
      Cost for Column Actions:
-       Defender: 2.0
-       Defend Left: 0.0
-       Defend Right: 0.0
-       w/Reserve: -3.0
-       Screen: -2.0
-       Counter Attack: -1.0     
+       Defender:
+            row_cost: 2.0
+            col_cost: -2.0
+       Defend Left:
+            row_cost: 0.0
+            col_cost: 0.0
+       Defend Right:
+            row_cost: 0.0
+            col_cost: 0.0
+       w/Reserve:
+            row_cost: -3.0
+            col_cost: 3.0
+       Screen:
+            row_cost: -2.0
+            col_cost: 2.0
+       Counter Attack:
+            row_cost: -1.0
+            col_cost: 1.0

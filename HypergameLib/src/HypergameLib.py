@@ -9,6 +9,8 @@ import texttable as tt
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
+from simpleeval import simple_eval
+from scipy.stats import hypergeom
 
 
 class HNF(object):
@@ -26,7 +28,16 @@ class HNF(object):
         BELIEF_COL_ACTIONS = "Belief for Column Action"
         CUR_BELIEF = "Current Belief"
         ROW_ACT_NAME = "rowActionName"
+        ROW_COST = "row_cost"
+        COL_COST = "col_cost"
         EU = "EU"
+        GLOBAL_CONST_VARS = "Global Const Vars"
+        GLOBAL_RAND_VARS = "Global Random Vars"
+        GLOBAL_RAND_VARS_TYPE = "type"
+        GLOBAL_RAND_VARS_STRING = "string"
+        GLOBAL_RAND_VARS_PARAMS = "params"
+
+        SUPPORTED_RAND_TYPE = {"hypergeom": hypergeom.cdf}
 
     class HNFFactory(object):
         """
@@ -52,8 +63,21 @@ class HNF(object):
                 column_action_names = self.settings[HNF.Consts.COL_ACT_NAMES]
                 name = self.settings[HNF.Consts.NAME]
 
+                # set the global vars
+                if HNF.Consts.GLOBAL_CONST_VARS in self.settings:
+                    self.const_vars = self.settings[HNF.Consts.GLOBAL_CONST_VARS]
+                    self.__verify_const_vars()
+                else:
+                    self.const_vars = {}
+                if HNF.Consts.GLOBAL_RAND_VARS in self.settings:
+                    self.rand_vars = self.settings[HNF.Consts.GLOBAL_RAND_VARS]
+                    self.__create_const_var_from_random_var()
+                else:
+                    self.rand_vars = {}
+
                 # init HNG object
-                self.HNFOut = HNF.HNFInstance(sit_names, row_action_names, column_action_names, name)
+                self.HNFOut = HNF.HNFInstance(sit_names, row_action_names,
+                                              column_action_names, name)
 
                 # set the values found in the settings
                 self.__initFromFile()
@@ -62,9 +86,9 @@ class HNF(object):
                 self.HNFOut.init_summary_belief()
 
                 # setup the output stuff
-                #self.HNFOut.situation_expected_utility()
-                #self.HNFOut.calc_hypergame_expected_utility()
-                #self.HNFOut.calc_modeling_opponent_utility()
+                # self.HNFOut.situation_expected_utility()
+                # self.HNFOut.calc_hypergame_expected_utility()
+                # self.HNFOut.calc_modeling_opponent_utility()
 
         def getHNFInstance(self):
             return self.HNFOut
@@ -87,15 +111,27 @@ class HNF(object):
             DESC: extracts cost from settings file and sets the cost in the HNF
             """
             # extract cost info from settings
-            costRows = map(lambda r: {HNF.Consts.ROW_ACTION: r[HNF.Consts.ROW_ACTION],
-                                      HNF.Consts.COST_COL_ACTIONS: r[HNF.Consts.COST_COL_ACTIONS]},
-                           self.settings[HNF.Consts.ROW_ACTION_COST])
+            cost_rows_row_player = map(lambda r: {HNF.Consts.ROW_ACTION:
+                                                         r[HNF.Consts.ROW_ACTION],
+                                                  HNF.Consts.COST_COL_ACTIONS:
+                                                         r[HNF.Consts.COST_COL_ACTIONS]},
+                                       self.settings[HNF.Consts.ROW_ACTION_COST])
+
             # set cost values
-            for costRow in costRows:
+            for costRow in cost_rows_row_player:
+                for action in costRow[HNF.Consts.COST_COL_ACTIONS]:
+                    cost = costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.ROW_COST]
+                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.ROW_COST] = simple_eval(str(cost), names=self.const_vars)
+
+                    cost = costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.COL_COST]
+                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.COL_COST] = simple_eval(str(cost), names=self.const_vars)
+
                 self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
-                                                costRow[HNF.Consts.COST_COL_ACTIONS])
-
-
+                                                costRow[HNF.Consts.COST_COL_ACTIONS],
+                                                actor="row")
+                self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
+                                                costRow[HNF.Consts.COST_COL_ACTIONS],
+                                                actor="column")
         def __setBeliefs(self):
             """
             DESC: extracts the beliefs from settings file and sets the belief in the HNF
@@ -118,6 +154,41 @@ class HNF(object):
                                       self.settings[HNF.Consts.ROW_BELIEF]))
             # set current beliefs
             self.HNFOut.set_current_belief(currentBeliefs)
+
+        def __create_const_var_from_random_var(self):
+            """
+            Initialize any random variable and set it in the const_var
+            :return:
+            """
+            for rand_var_key in self.rand_vars.keys():
+                # make sure that the correct keys are in available
+                assert HNF.Consts.GLOBAL_RAND_VARS_TYPE in \
+                       self.rand_vars[rand_var_key].keys() and \
+                       HNF.Consts.GLOBAL_RAND_VARS_PARAMS in \
+                       self.rand_vars[rand_var_key].keys()
+
+                # verify correct rand type
+                assert self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_TYPE] in \
+                       HNF.Consts.SUPPORTED_RAND_TYPE
+
+                # 1. replace the params vals with global constants
+                for param in self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_PARAMS].keys():
+                    param_val = self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_PARAMS][param]
+                    self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_PARAMS][param] \
+                        = simple_eval(str(param_val), names=self.const_vars)
+                # 2. evaluate the "string" in global random vars
+                rand_var_type = self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_TYPE]
+                rand_var_str = self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_STRING]
+                rand_var_params = self.rand_vars[rand_var_key][HNF.Consts.GLOBAL_RAND_VARS_PARAMS]
+                # 3. store the calculated value into const_vars
+                self.const_vars[rand_var_key] = simple_eval(str(rand_var_str),
+                                                            names=rand_var_params,
+                                                            functions=HNF.Consts.SUPPORTED_RAND_TYPE)
+
+        def __verify_const_vars(self):
+            for const_key in self.const_vars:
+                assert type(self.const_vars[const_key]) is float
+            pass
 
     class HNFInstance(object):
         """
@@ -163,8 +234,12 @@ class HNF(object):
             self.columnActionNames = columnActionNames
 
             # init the mats
-            self.costs = pd.DataFrame(index=rowActionNames,
-                                      columns=columnActionNames)
+            self.costs_row = pd.DataFrame(index=rowActionNames,
+                                          columns=columnActionNames)
+
+            self.costs_column = pd.DataFrame(index=rowActionNames,
+                                             columns=columnActionNames)
+
             self.situationalBeliefs = pd.DataFrame(index=situationNames,
                                                    columns=columnActionNames)
 
@@ -206,29 +281,37 @@ class HNF(object):
             for key in updatedCurrentBeilefDict.keys():
                 self.currentBelief[key] = updatedCurrentBeilefDict[key]
 
-        def set_costs_by_action(self, actionName, updatedDict):
+        def set_costs_by_action(self, action_name, updated_dict, actor="row"):
             """
             DESC:
                 Set the cost for a given action. The action can be either a row or a
                 column action.
             INPUT:
-                :param actionName: the action name to be updated.
-                :param updatedDict: a dictionary with updated values. The keys must
-                    must be row or column action names and the values should be the
-                    costs
+                :param action_name: the action name to be updated.
+                :param updated_dict: a dictionary with updated values. The keys must
+                                     must be row or column action names and the values
+                                     should be the costs
+                :param actor : must be either "row" or "column"
             """
-            assert type(updatedDict) is dict
-            assert actionName in self.rowActionNames or \
-                   actionName in self.columnActionNames
-
-            if actionName in self.rowActionNames:
+            assert type(updated_dict) is dict
+            assert action_name in self.rowActionNames or \
+                   action_name in self.columnActionNames
+            assert actor is "row" or actor is "column"
+            if action_name in self.rowActionNames:
                 # Update a defenders cost row
-                for k in updatedDict.keys():
-                    self.costs.loc[actionName][k] = updatedDict[k]
-            elif actionName in self.columnActionNames:
+                for k in updated_dict.keys():
+                    if actor == "row":
+                        self.costs_row.loc[action_name][k] = updated_dict[k][HNF.Consts.ROW_COST]
+                    elif actor == "column":
+                        self.costs_column.loc[action_name][k] = updated_dict[k][HNF.Consts.COL_COST]
+
+            elif action_name in self.columnActionNames:
                 # Update a column
-                for k in updatedDict.keys():
-                    self.costs[actionName][k] = updatedDict[k]
+                for k in updated_dict.keys():
+                    if actor == "row":
+                        self.costs_row[action_name][k] = updated_dict[k][HNF.Consts.ROW_COST]
+                    elif actor == "column":
+                        self.costs_column[action_name][k] = updated_dict[k][HNF.Consts.COL_COST]
 
         def set_situational_beliefs(self, name, updatedDict):
             """
@@ -245,11 +328,9 @@ class HNF(object):
                     :param updatedDict:
             """
             assert type(updatedDict) is dict
-            assert name in self.situationNames or \
-                   name in self.columnActionNames
+            assert name in self.situationNames or name in self.columnActionNames
 
             if name in self.situationNames:
-
                 for k in updatedDict.keys():
                     self.situationalBeliefs.loc[name][k] = updatedDict[k]
             elif name in self.columnActionNames:
@@ -300,7 +381,7 @@ class HNF(object):
                 tmp_sum = 0.0
                 for columnActionName in self.columnActionNames:
                     tmp_sum += self.summaryBeliefs[columnActionName] * \
-                               self.costs[columnActionName][rowActionName]
+                               self.costs_row[columnActionName][rowActionName]
                 expected_utility[rowActionName] = round(tmp_sum, self.ROUND_DEC)
             return expected_utility
 
@@ -313,9 +394,9 @@ class HNF(object):
             """
             heu = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
-                heu[rowActionName] = (1.0 - self.uncertainty) *\
-                                     expected_util[rowActionName] +\
-                                     self.uncertainty *\
+                heu[rowActionName] = (1.0 - self.uncertainty) * \
+                                     expected_util[rowActionName] + \
+                                     self.uncertainty * \
                                      self.__get_worst_case_action(rowActionName)
             return heu
 
@@ -331,7 +412,7 @@ class HNF(object):
             for rowActionName in self.rowActionNames:
                 mo_expected_util[rowActionName] = \
                     max(map(lambda i: self.summaryBeliefs[i] *
-                            self.costs.loc[rowActionName][i],
+                                      self.costs_row.loc[rowActionName][i],
                             self.columnActionNames))
             return mo_expected_util
 
@@ -364,7 +445,7 @@ class HNF(object):
             # bottom half of table
             for rowActionName in self.rowActionNames:
                 tmp_row = [expected_util[rowActionName], rowActionName]
-                tmp_row.extend(self.costs.loc[rowActionName])
+                tmp_row.extend(self.costs_row.loc[rowActionName])
                 main_out_table.append(tmp_row)
 
             main_tab.add_rows(main_out_table, header=False)
@@ -412,7 +493,7 @@ class HNF(object):
                 # save the HEU for each action
                 for rowActionName in self.rowActionNames:
                     heu_over_time[rowActionName] = heu_over_time[rowActionName] + \
-                                                 [heu[rowActionName]]
+                                                   [heu[rowActionName]]
 
             for rowActionName in self.rowActionNames:
                 plt.plot(np.arange(0.0, 1.1, step), heu_over_time[rowActionName], label=rowActionName)
@@ -470,22 +551,22 @@ class HNF(object):
             """
             # check to see if the row action name is valid
             assert rowActionName in self.rowActionNames
-            return min(self.costs.loc[rowActionName])
+            return min(self.costs_row.loc[rowActionName])
 
         def create_gambit_game(self, situation):
-            colLen = len([item for item in self.situationalBeliefs.loc[situation] if item != "X"])
-            g = gambit.Game.new_table([len(self.rowActionNames), colLen])
+            col_len = len([item for item in self.situationalBeliefs.loc[situation] if item != "X"])
+            g = gambit.Game.new_table([len(self.rowActionNames), col_len])
             g.title = situation
             g.players[0].label = "Row Player"
             self.__set_gambit_actions(g, 0, situation)
             g.players[1].label = "Column Player"
-            colActionNames = self.__set_gambit_actions(g, 1, situation)
+            col_action_names = self.__set_gambit_actions(g, 1, situation)
 
-            for col_ind, col_name in enumerate(colActionNames):
+            for col_ind, col_name in enumerate(col_action_names):
                 for row_ind, row_name in enumerate(self.rowActionNames):
-                    g[row_ind, col_ind][0] = int(self.costs[col_name][row_name])
+                    g[row_ind, col_ind][0] = int(self.costs_row[col_name][row_name])
                     # hack for now
-                    g[row_ind, col_ind][1] = int(-1 * self.costs[col_name][row_name])
+                    g[row_ind, col_ind][1] = int(self.costs_column[col_name][row_name])
 
             return g
 
@@ -500,7 +581,7 @@ class HNF(object):
                 for colActionName in self.columnActionNames:
                     if self.situationalBeliefs.loc[situation][colActionName] != "X":
                         action_names.append(colActionName)
-                #action_names = self.columnActionNames
+                        # action_names = self.columnActionNames
 
             for i, actionName in enumerate(action_names):
                 g.players[player_index].strategies[i].label = actionName
