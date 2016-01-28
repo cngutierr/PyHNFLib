@@ -1,0 +1,82 @@
+Name: EXP6
+Situation Names: [C1, C0]
+Row Action Names: [Row 1, Row 2, Row 3, Row 4]
+Column Action Names: [Col 1, Col 2, Col 3, Col 4]
+
+Row Belief:
+   - Situation Name: C1
+     Current Belief: 0.8
+     Belief for Column Action:
+        Col 1: 0.6
+        Col 2: 0.15
+        Col 3: 0.25
+        Col 4: 0.0
+
+   - Situation Name: C0
+     Current Belief: 0.2
+     Belief for Column Action:
+        Col 1: 0.4358
+        Col 2: 0.0503
+        Col 3: 0.3184
+        Col 4: 0.1955
+
+Row Action Cost:
+   - Row Action: Row 1
+     Cost for Column Actions:
+        Col 1:
+            row_cost: -2.0
+            col_cost: 2.0
+        Col 2:
+            row_cost: -1.0
+            col_cost: 1.0
+        Col 3:
+            row_cost: 3.0
+            col_cost: -3.0
+        Col 4:
+            row_cost: -2.0
+            col_cost: 2.0
+
+   - Row Action: Row 2
+     Cost for Column Actions:
+        Col 1:
+            row_cost: -1.0
+            col_cost: 1.0
+        Col 2:
+            row_cost: 4.0
+            col_cost: -4.0
+        Col 3:
+            row_cost: -1.0
+            col_cost: 1.0
+        Col 4:
+            row_cost: 1.0
+            col_cost: -1.0
+
+   - Row Action: Row 3
+     Cost for Column Actions:
+        Col 1:
+            row_cost: 2.0
+            col_cost: -2.0
+        Col 2:
+            row_cost: -3.0
+            col_cost: 3.0
+        Col 3:
+            row_cost: -4.0
+            col_cost: 4.0
+        Col 4:
+            row_cost: 1.0
+            col_cost: -1.0
+
+   - Row Action: Row 4
+     Cost for Column Actions:
+        Col 1:
+            row_cost: -2.0
+            col_cost: 2.0
+        Col 2:
+            row_cost: -2.0
+            col_cost: 2.0
+        Col 3:
+            row_cost: 5.0
+            col_cost: -5.0
+        Col 4:
+            row_cost: -5.0
+            col_cost: 5.0

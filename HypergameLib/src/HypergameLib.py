@@ -36,8 +36,8 @@ class HNF(object):
         GLOBAL_RAND_VARS_TYPE = "type"
         GLOBAL_RAND_VARS_STRING = "string"
         GLOBAL_RAND_VARS_PARAMS = "params"
-
         SUPPORTED_RAND_TYPE = {"hypergeom": hypergeom.cdf}
+        HYPERSTRATS = ["MO"]
 
     class HNFFactory(object):
         """
@@ -80,7 +80,7 @@ class HNF(object):
                                               column_action_names, name)
 
                 # set the values found in the settings
-                self.__initFromFile()
+                self.__init_from_file()
 
                 # calc the summary and expected utility
                 self.HNFOut.init_summary_belief()
@@ -90,41 +90,43 @@ class HNF(object):
                 # self.HNFOut.calc_hypergame_expected_utility()
                 # self.HNFOut.calc_modeling_opponent_utility()
 
-        def getHNFInstance(self):
+        def get_HNF_Instance(self):
             return self.HNFOut
 
-        def __initFromFile(self):
+        def __init_from_file(self):
             """
             DESC: extracts all the settings found in the config file and inits
                 the HNF object.
             """
-            self.__setCosts()
-            self.__setBeliefs()
-            self.__setCurrentBelief()
+            self.__set_costs()
+            self.__set_beliefs()
+            self.__set_current_belief()
 
             # Gambit games -- each belief context will be modeled as a sep gambit game
             for situation in self.HNFOut.situationNames:
                 self.HNFOut.append_gambit_game(situation)
 
-        def __setCosts(self):
+        def __set_costs(self):
             """
             DESC: extracts cost from settings file and sets the cost in the HNF
             """
             # extract cost info from settings
             cost_rows_row_player = map(lambda r: {HNF.Consts.ROW_ACTION:
-                                                         r[HNF.Consts.ROW_ACTION],
+                                                      r[HNF.Consts.ROW_ACTION],
                                                   HNF.Consts.COST_COL_ACTIONS:
-                                                         r[HNF.Consts.COST_COL_ACTIONS]},
+                                                      r[HNF.Consts.COST_COL_ACTIONS]},
                                        self.settings[HNF.Consts.ROW_ACTION_COST])
 
             # set cost values
             for costRow in cost_rows_row_player:
                 for action in costRow[HNF.Consts.COST_COL_ACTIONS]:
                     cost = costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.ROW_COST]
-                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.ROW_COST] = simple_eval(str(cost), names=self.const_vars)
+                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.ROW_COST] = simple_eval(str(cost),
+                                                                                                    names=self.const_vars)
 
                     cost = costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.COL_COST]
-                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.COL_COST] = simple_eval(str(cost), names=self.const_vars)
+                    costRow[HNF.Consts.COST_COL_ACTIONS][action][HNF.Consts.COL_COST] = simple_eval(str(cost),
+                                                                                                    names=self.const_vars)
 
                 self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
                                                 costRow[HNF.Consts.COST_COL_ACTIONS],
@@ -132,28 +134,29 @@ class HNF(object):
                 self.HNFOut.set_costs_by_action(costRow[HNF.Consts.ROW_ACTION],
                                                 costRow[HNF.Consts.COST_COL_ACTIONS],
                                                 actor="column")
-        def __setBeliefs(self):
+
+        def __set_beliefs(self):
             """
             DESC: extracts the beliefs from settings file and sets the belief in the HNF
             """
             # extract the belief values from settings
-            beliefRows = map(lambda r: {HNF.Consts.SIT_NAME: r[HNF.Consts.SIT_NAME],
-                                        HNF.Consts.BELIEF_COL_ACTIONS: r[HNF.Consts.BELIEF_COL_ACTIONS]},
-                             self.settings[HNF.Consts.ROW_BELIEF])
+            belief_rows = map(lambda r: {HNF.Consts.SIT_NAME: r[HNF.Consts.SIT_NAME],
+                                         HNF.Consts.BELIEF_COL_ACTIONS: r[HNF.Consts.BELIEF_COL_ACTIONS]},
+                              self.settings[HNF.Consts.ROW_BELIEF])
             # set belief values
-            for beliefRow in beliefRows:
+            for beliefRow in belief_rows:
                 self.HNFOut.set_situational_beliefs(beliefRow[HNF.Consts.SIT_NAME],
                                                     beliefRow[HNF.Consts.BELIEF_COL_ACTIONS])
 
-        def __setCurrentBelief(self):
+        def __set_current_belief(self):
             """
             DESC: Extracts the current belief from file and sets the current belief.
             """
             # extract current belief from settings
-            currentBeliefs = dict(map(lambda r: (r[HNF.Consts.SIT_NAME], r[HNF.Consts.CUR_BELIEF]),
-                                      self.settings[HNF.Consts.ROW_BELIEF]))
+            current_beliefs = dict(map(lambda r: (r[HNF.Consts.SIT_NAME], r[HNF.Consts.CUR_BELIEF]),
+                                       self.settings[HNF.Consts.ROW_BELIEF]))
             # set current beliefs
-            self.HNFOut.set_current_belief(currentBeliefs)
+            self.HNFOut.set_current_belief(current_beliefs)
 
         def __create_const_var_from_random_var(self):
             """
@@ -265,21 +268,21 @@ class HNF(object):
             self.HNFName = name
             self.uncertainty = uncertainty
 
-        def set_current_belief(self, updatedCurrentBeilefDict):
+        def set_current_belief(self, updated_current_beilef_dict):
             """
             DESC:
                 Set the current belief values.
             INPUT:
                 updatedCurrentBeilefDict (dict) - a dictionary with keys equal to
                 situation name and values summing up to 1.
-                :param updatedCurrentBeilefDict:
+                :param updated_current_beilef_dict:
             """
-            assert type(updatedCurrentBeilefDict) is dict
-            assert set(updatedCurrentBeilefDict.keys()) == set(self.situationNames)
-            assert 0.99 <= sum(updatedCurrentBeilefDict.values()) <= 1.0
+            assert type(updated_current_beilef_dict) is dict
+            assert set(updated_current_beilef_dict.keys()) == set(self.situationNames)
+            assert 0.99 <= sum(updated_current_beilef_dict.values()) <= 1.0
 
-            for key in updatedCurrentBeilefDict.keys():
-                self.currentBelief[key] = updatedCurrentBeilefDict[key]
+            for key in updated_current_beilef_dict.keys():
+                self.currentBelief[key] = updated_current_beilef_dict[key]
 
         def set_costs_by_action(self, action_name, updated_dict, actor="row"):
             """
@@ -294,8 +297,7 @@ class HNF(object):
                 :param actor : must be either "row" or "column"
             """
             assert type(updated_dict) is dict
-            assert action_name in self.rowActionNames or \
-                   action_name in self.columnActionNames
+            assert action_name in self.rowActionNames or action_name in self.columnActionNames
             assert actor is "row" or actor is "column"
             if action_name in self.rowActionNames:
                 # Update a defenders cost row
@@ -356,17 +358,17 @@ class HNF(object):
             self.__verify_current_beliefs()
 
             for columnActionName in self.columnActionNames:
-                tmpSum = 0.0
+                tmp_sum = 0.0
                 for situationName in self.situationNames:
                     if self.situationalBeliefs[columnActionName][situationName] != "X":
-                        tmpSum += self.currentBelief[situationName] * \
+                        tmp_sum += self.currentBelief[situationName] * \
                                   self.situationalBeliefs[columnActionName][situationName]
-                self.summaryBeliefs[columnActionName] = round(tmpSum, self.ROUND_DEC)
+                self.summaryBeliefs[columnActionName] = round(tmp_sum, self.ROUND_DEC)
 
             # make the summary belief is valid
             self.__verify_summary_belief()
 
-        def situation_expected_utility(self, situation=""):
+        def calc_expected_values(self, sit_name =""):
             """
             DESC
                 calculate the expected utility. Summary belief, current belief,
@@ -376,14 +378,41 @@ class HNF(object):
             self.__verify_current_beliefs()
             self.__verify_situational_beliefs()
 
-            expected_utility = dict.fromkeys(self.rowActionNames, 0.0)
+            expected_values = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
                 tmp_sum = 0.0
                 for columnActionName in self.columnActionNames:
-                    tmp_sum += self.summaryBeliefs[columnActionName] * \
+                    if sit_name == "":
+                        tmp_sum += self.summaryBeliefs[columnActionName] * \
                                self.costs_row[columnActionName][rowActionName]
-                expected_utility[rowActionName] = round(tmp_sum, self.ROUND_DEC)
-            return expected_utility
+                    else:
+                        try:
+                            tmp_sum += self.situationalBeliefs[columnActionName][sit_name] * \
+                               self.costs_row[columnActionName][rowActionName]
+                        except:
+                            tmp_sum += 0
+                expected_values[rowActionName] = round(tmp_sum, self.ROUND_DEC)
+            return expected_values
+
+        def calc_expected_utility(self, expected_value, hyperstrat):
+            """
+            calculates EU from the expected values.
+            :param expected_value: a vector of expected values
+            :return:
+            """
+            sum = 0.0
+            for rowActionName in self.rowActionNames:
+                sum += hyperstrat[rowActionName] * expected_value[rowActionName]
+            return sum
+
+        def calc_g(self, hyperstrat):
+            sum = 0.0
+            for rowActionName in self.rowActionNames:
+                sum += hyperstrat[rowActionName] * self.__get_worst_case_action(rowActionName)
+            return sum
+
+        def calc_heu(self, eu, g):
+            return eu - (eu - g) * self.uncertainty
 
         def calc_hypergame_expected_utility(self, expected_util):
             """
@@ -411,15 +440,24 @@ class HNF(object):
             mo_expected_util = dict.fromkeys(self.rowActionNames, 0.0)
             for rowActionName in self.rowActionNames:
                 mo_expected_util[rowActionName] = \
-                    max(map(lambda i: self.summaryBeliefs[i] *
-                                      self.costs_row.loc[rowActionName][i],
+                    max(map(lambda col_action: self.summaryBeliefs[col_action] *
+                                      self.costs_row.loc[rowActionName][col_action],
                             self.columnActionNames))
+
+            max_loc = max(mo_expected_util, key=mo_expected_util.get)
+            # map the results to a pure strat
+            mo_expected_util = {key: 1 if key == max_loc else 0 for key, value in mo_expected_util.items()}
+
             return mo_expected_util
 
-        # The following is need:
-        #    1. HEU for ALL row actions
-        #    2. MO for ALL row actions
-        #    3. Best HEU for
+        def calc_pick_subgame_vector(self):
+            best_strat = {}
+            for sit in self.situationNames:
+                print sit
+                nems = self.calc_nems_expected_util(sit)
+                ev = self.calc_expected_values(sit)
+                best_strat[sit] = self.calc_expected_utility(ev, nems)
+            print best_strat
 
         def print_hnf_table(self, expected_util):
             """
@@ -429,7 +467,9 @@ class HNF(object):
             heu_tab = tt.Texttable()
 
             first_row = ["Current Belief", "Summary Belief"]
-            first_row.extend(self.summaryBeliefs.values())
+
+            #self.summaryBeliefs.values()]
+            first_row.extend([self.summaryBeliefs[name] for name in self.columnActionNames])
             main_out_table = [first_row]
 
             # top half of table
@@ -453,6 +493,23 @@ class HNF(object):
             print "Name: " + self.HNFName
             print "Uncertainty: %f" % self.uncertainty
             print main_tab.draw()
+
+            results = self.calc_all_results()
+            mo_tab = tt.Texttable()
+            first_row = ["Row Actions", "MO"]
+            mo_tab.add_row(first_row)
+
+            for rowActionName in self.rowActionNames:
+                tmp_row = [rowActionName, results["MO"]["Strategy Vector"][rowActionName]]
+                mo_tab.add_row(tmp_row)
+            mo_tab.add_row(["EU", results["MO"]["Expected Utility"]])
+            mo_tab.add_row(["G", results["MO"]["Worst Case"]])
+            mo_tab.add_row(["HEU", results["MO"]["HEU"]])
+
+            print mo_tab.draw()
+            # create a new table
+
+
             # print "Best expected utility: (%s, %0.2f)" % \
             #    (self.bestCaseEU[HNF.Consts.ROW_ACT_NAME], \
             #            self.bestCaseEU[HNF.Consts.EU])
@@ -467,14 +524,26 @@ class HNF(object):
             OUTPUT
                 Text to the console showing the table and a matplot
             """
-            self.heu_plot_over_uncertainty()
-            self.print_hnf_table(self.situation_expected_utility())
+            #self.heu_plot_over_uncertainty()
+            self.print_hnf_table(self.calc_expected_values())
 
-        def calculate_results(self):
+        def calc_all_results(self):
+            final_results = {}
+            for hyperstrat_name in HNF.Consts.HYPERSTRATS:
+                results = {}
+                if hyperstrat_name == "MO":
+                    results["Strategy Vector"] = self.calc_modeling_opponent_utility()
+                results["Expected Values"] = self.calc_expected_values()
+                results["Expected Utility"] = self.calc_expected_utility(results["Expected Values"],
+                                                                         results["Strategy Vector"])
+                results["Worst Case"] = self.calc_g(results["Strategy Vector"])
+                results["HEU"] = self.calc_heu(results["Expected Utility"],
+                                               results["Worst Case"])
+                final_results[hyperstrat_name] = results
 
-            pass
+            return final_results
 
-        def heu_plot_over_uncertainty(self, situation="", step=0.1):
+        def heu_plot_over_uncertainty(self, step=0.1):
             """
             DESC: Plot the uncertainty from 0.0 to 1.0 given a step
             :param step:
@@ -488,8 +557,8 @@ class HNF(object):
             # iterate over the uncertainty range. For each step, update the eu
             for uncertainty in np.arange(0.0, 1.1, step):
                 self.set_uncertainty(uncertainty)
-                eu = self.situation_expected_utility(situation)
-                heu = self.calc_hypergame_expected_utility(eu)
+                expected_vals = self.calc_expected_values()
+                heu = self.calc_hypergame_expected_utility(expected_vals)
                 # save the HEU for each action
                 for rowActionName in self.rowActionNames:
                     heu_over_time[rowActionName] = heu_over_time[rowActionName] + \
@@ -498,12 +567,12 @@ class HNF(object):
             for rowActionName in self.rowActionNames:
                 plt.plot(np.arange(0.0, 1.1, step), heu_over_time[rowActionName], label=rowActionName)
 
+            self.uncertainty = old_uncertainty
             plt.title("Hypergame Expected Utility over uncertainty")
             plt.xlabel("Uncertainty")
             plt.ylabel("Hypergame Expected Utility")
             plt.legend()
             plt.show()
-            self.uncertainty = old_uncertainty
 
         def __verify_all_entries(self):
             """
@@ -553,7 +622,7 @@ class HNF(object):
             assert rowActionName in self.rowActionNames
             return min(self.costs_row.loc[rowActionName])
 
-        def create_gambit_game(self, situation):
+        def __create_gambit_game(self, situation):
             col_len = len([item for item in self.situationalBeliefs.loc[situation] if item != "X"])
             g = gambit.Game.new_table([len(self.rowActionNames), col_len])
             g.title = situation
@@ -594,15 +663,11 @@ class HNF(object):
             :param situation:
             :return:
             """
-            self.gambitGames[situation] = self.create_gambit_game(situation)
+            self.gambitGames[situation] = self.__create_gambit_game(situation)
 
-        def calc_nems_expected_util(self, situation):
+        def calc_nems_expected_util(self, situation, player="Row Player"):
             game = self.gambitGames[situation]
             solver = gambit.nash.ExternalLogitSolver()
             s = solver.solve(game)
-            nems_eu = s[:len(self.rowActionNames)]
-            return nems_eu
-
-        def calc_nems_expected_value(self, expected_util):
-
-            pass
+            # return the first nash equl.
+            return dict(zip(self.rowActionNames, s[0][player]))

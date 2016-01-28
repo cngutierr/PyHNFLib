@@ -1,16 +1,37 @@
 Name: Simple Credit Card Example
-Situation Names: [Naive Attacker, Aware Attacker]
+Situation Names: [Naive Attacker, Aggressive Attacker, Modest Attacker, Cautious Attacker]
 Row Action Names: [Use Deception, No Deception]
 Column Action Names: [Exfiltrate, Abort]
+
+Outcome Names:
+    Deception Hit: (Use Deception, Exfiltrate)
+    Deception Miss: (Use Deception, Abort)
+    Exfiltrate Success: (No Deception, Exfiltrate)
+    Ideal: (No Deception, Abort)
+
+Evolution Vars:
+    column_player_action_probs:
+        Exfiltrate: 0.95
+        Abort: 0.05
+    column_player_true_consts:
+        exfil_rate: 0.5
+
+    # update percentage. Vars should match global consts
+    dec_rate:
+        type: add
+        rate: 0.01
+    dec_rate_bound: 0.5             # upper bound of deception (not used)
+    results:
+
 Global Const Vars:
     # must be floats
     db_size: 100.0                  # size of the database we are trying to protect
     cost_dec: 10.0                  # the cost to create a single false entry
     cost_exfil: 35.0                # damage per leaked info
-    exfil_rate: 0.08                # % of db that attacker will use
+    exfil_rate: 0.079               # % of db that attacker will use
     dec_rate: 0.05                  # % of false entries in db
     leak_mult: 1.25
-    dec_rate_bound: 0.5             # upper bound of deception (not used)
+
 Global Random Vars:
     prob_uncaught:
         type: hypergeom              # name in scipy lib cdf
@@ -22,16 +43,28 @@ Global Random Vars:
             N: exfil_rate * db_size  # number of rows exfil
 Row Belief:
    - Situation Name: Naive Attacker
-     Current Belief: 0.95
+     Current Belief: 0.70
      Belief for Column Action:
         Exfiltrate: 1.0
         Abort: 0.0
        
-   - Situation Name: Aware Attacker
+   - Situation Name: Aggressive Attacker
+     Current Belief: 0.15
+     Belief for Column Action:
+        Exfiltrate: 0.75
+        Abort: 0.25
+
+   - Situation Name: Modest Attacker
+     Current Belief: 0.1
+     Belief for Column Action:
+        Exfiltrate: 0.5
+        Abort: 0.5
+
+   - Situation Name: Cautious Attacker
      Current Belief: 0.05
      Belief for Column Action:
-        Exfiltrate: 0.05
-        Abort: 0.95
+        Exfiltrate: 0.25
+        Abort: 0.75
 
 Row Action Cost:
    - Row Action: Use Deception

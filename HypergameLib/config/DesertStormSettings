@@ -9,9 +9,9 @@ Row Belief:
        Defender: 1.0
        Defend Left: 0.0
        Defend Right: 0.0
-       w/Reserve: 0.0
-       Screen: 0.0
-       Counter Attack: 0.0
+       w/Reserve: X
+       Screen: X
+       Counter Attack: X
        
    - Situation Name: 6x6 Subgame
      Current Belief: 0.2

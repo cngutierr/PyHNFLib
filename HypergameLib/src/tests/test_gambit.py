@@ -125,7 +125,7 @@ class MyTestCase(unittest.TestCase):
         DESC
             Display the HNF info created from file
         """
-        simple_opm = HNF.HNFFactory("../../config/SimpleOPM").getHNFInstance()
+        simple_opm = HNF.HNFFactory("../../config/SimpleOPM").get_HNF_Instance()
         simple_opm.display_hnf()
         for i, game in enumerate(simple_opm.gambitGames.values()):
             self.assertEqual(game.players[0].label, "Row Player", "Labels are incorrect")
@@ -157,7 +157,7 @@ class MyTestCase(unittest.TestCase):
         DESC
             Display the HNF info created from file
         """
-        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").getHNFInstance()
+        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").get_HNF_Instance()
         DesertStormHNF.display_hnf()
         for i, game in enumerate(DesertStormHNF.gambitGames.values()):
             self.assertEqual(game.players[0].label, "Row Player", "Labels are incorrect")
