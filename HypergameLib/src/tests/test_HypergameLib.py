@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
             Display the HNF info created from file
         '''
         TerroristHNF = HNF.HNFFactory("../../config/terroristSettings")\
-                       .get_HNF_Instance()
+                       .get_hnf_instance()
         TerroristHNF.display_hnf()
         
         self.assertTrue(TerroristHNF.HNFName == "Terrorist Example",
@@ -27,19 +27,19 @@ class Test(unittest.TestCase):
         DESC
             Display the HNF info created from file
         '''
-        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").get_HNF_Instance()
+        DesertStormHNF = HNF.HNFFactory("../../config/DesertStormSettings").get_hnf_instance()
         DesertStormHNF.display_hnf()
         self.assertTrue(DesertStormHNF.HNFName == "Desert Storm Example",
                         "Unable to Parse name")
         print DesertStormHNF.calc_nems_expected_util("3x3 Subgame")
         print DesertStormHNF.calc_nems_expected_util("6x6 Subgame")
 
-    def test_HNFCreator_exp9(self):
+    def __test_HNFCreator_exp9(self):
         '''
         DESC
             Display the HNF info created from file
         '''
-        exp9HNF = HNF.HNFFactory("../../config/exp9").get_HNF_Instance()
+        exp9HNF = HNF.HNFFactory("../../config/exp9").get_hnf_instance()
         exp9HNF.display_hnf()
 
         print exp9HNF.calc_nems_expected_util("C1")
@@ -47,17 +47,15 @@ class Test(unittest.TestCase):
 
 
 
-    def test_HNFCreator_exp512(self):
+    def __test_HNFCreator_exp512(self):
         '''
         DESC
             Display the HNF info created from file
         '''
-        exp512HNF = HNF.HNFFactory("../../config/exp512").get_HNF_Instance()
+        exp512HNF = HNF.HNFFactory("../../config/exp512").get_hnf_instance()
         exp512HNF.set_uncertainty(0.2)
         exp512HNF.display_hnf()
 
-        print exp512HNF.calc_nems_expected_util("C1")
-        print exp512HNF.calc_nems_expected_util("C0")
 
 
     def __test_HNFCreator_SimpleOPM(self):
@@ -65,18 +63,20 @@ class Test(unittest.TestCase):
         DESC
             Display the HNF info created from file
         '''
-        DesertStormHNF = HNF.HNFFactory("../../config/SimpleOPM").get_HNF_Instance()
+        DesertStormHNF = HNF.HNFFactory("../../config/SimpleOPM").get_hnf_instance()
         DesertStormHNF.display_hnf()
         self.assertTrue(DesertStormHNF.HNFName == "Simple OPM Example",
                         "Unable to Parse name")
         DesertStormHNF.gambitGames
 
-    def _test_HNFCreator_CreditCard(self):
+    def test_HNFCreator_CreditCard(self):
         '''
         DESC
             Display the HNF info created from file
         '''
-        CreditCardHNF = HNF.HNFFactory("../../config/SimpleCreditCard").get_HNF_Instance()
+        CreditCardHNF = HNF.HNFFactory("../../config/SimpleCreditCard").get_hnf_instance()
+        CreditCardHNF.set_uncertainty(0.1)
+
         CreditCardHNF.display_hnf()
         self.assertTrue(CreditCardHNF.HNFName == "Simple Credit Card Example",
                         "Unable to Parse name")

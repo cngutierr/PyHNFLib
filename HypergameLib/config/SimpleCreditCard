@@ -9,68 +9,99 @@ Outcome Names:
     Exfiltrate Success: (No Deception, Exfiltrate)
     Ideal: (No Deception, Abort)
 
-Evolution Vars:
-    column_player_action_probs:
-        Exfiltrate: 0.95
-        Abort: 0.05
-    column_player_true_consts:
-        exfil_rate: 0.5
-
-    # update percentage. Vars should match global consts
-    dec_rate:
-        type: add
-        rate: 0.01
-    dec_rate_bound: 0.5             # upper bound of deception (not used)
-    results:
-
 Global Const Vars:
     # must be floats
-    db_size: 100.0                  # size of the database we are trying to protect
-    cost_dec: 10.0                  # the cost to create a single false entry
-    cost_exfil: 35.0                # damage per leaked info
-    exfil_rate: 0.079               # % of db that attacker will use
-    dec_rate: 0.05                  # % of false entries in db
-    leak_mult: 1.25
+    db_size: 1000.0              # size of the database we are trying to protect
+    cost_dec: 2.5               # the cost to create a single false entry
+    cost_exfil: 25.0            # damage per leaked info
+    exfil_rate: 0.1             # % of db that attacker will use
+    dec_rate: 0.01              # % of false entries in db
+    leak_mult: 1.10
+    leak_add: 1.0
 
 Global Random Vars:
     prob_uncaught:
-        type: hypergeom              # name in scipy lib cdf
-        string: hypergeom(x, M, n, N)
+        type: hypergeom_cdf          # name in scipy lib cdf
+        string: hypergeom_cdf(x, M, n, N)
         params:
             x: 0.0                   # false entries in sample
             M: db_size               # sample size
             n: dec_rate * db_size    # number of false entries
             N: exfil_rate * db_size  # number of rows exfil
+
+
+Stochastic Column Player:
+    # random vars are calculated first
+    Random Vars:
+        # 1. determine the % that the adversary will attempt to exfiltrate
+        # exfiltrate norm.rvs(loc, scale) of the database
+        round_exfil_rate:
+            type: norm_rvs
+            string: norm_rvs(loc, scale)
+            params:
+                loc: 0.20
+                scale: 0.05
+
+        # For each item in DB, steal the amount drawn from norm(25, 5)
+    #to be calculated after random vars
+    Update Vars:
+        # 2. calc vector to store the amount per account that will be exfiltrated
+        round_cost_exfil:
+            type: norm_rvs
+            string: norm_rvs(loc, scale, size)
+            params:
+                loc: 25.0
+                scale: 5.0
+                size: round_exfil_rate * db_size
+
+        # 3. determine how many accounts will be used without being caught
+        #    This should be: hypergeom.rvs(total, total-(total*dec_rate), round_exfil_rate * total)
+        round_num_exfil_suc:
+            type: sample_hg_til_caught
+            string: sample_hg_til_caught(M, n, N)
+            params:
+                M: db_size
+                n: (1 - dec_rate) * db_size   # number of true entries
+                N: round_exfil_rate * db_size # num of exfil this round
+    Result Vars:
+        # 4. calculate the total losses
+        total_cost:
+            type: sum
+            string: sum(slice_list(l, u))
+            params:
+                l: round_cost_exfil
+                u: round_num_exfil_suc
+
 Row Belief:
    - Situation Name: Naive Attacker
      Current Belief: 0.70
      Belief for Column Action:
-        Exfiltrate: 1.0
-        Abort: 0.0
+        Exfiltrate: 0.35
+        Abort: 0.65
        
    - Situation Name: Aggressive Attacker
      Current Belief: 0.15
      Belief for Column Action:
-        Exfiltrate: 0.75
-        Abort: 0.25
+        Exfiltrate: 0.20
+        Abort: 0.80
 
    - Situation Name: Modest Attacker
      Current Belief: 0.1
      Belief for Column Action:
-        Exfiltrate: 0.5
-        Abort: 0.5
+        Exfiltrate: 0.1
+        Abort: 0.9
 
    - Situation Name: Cautious Attacker
      Current Belief: 0.05
      Belief for Column Action:
-        Exfiltrate: 0.25
-        Abort: 0.75
+        Exfiltrate: 0.05
+        Abort: 0.95
 
 Row Action Cost:
    - Row Action: Use Deception
      Cost for Column Actions:
         Exfiltrate:
-            row_cost: -(cost_dec * dec_rate * db_size + leak_mult * prob_uncaught * cost_exfil * exfil_rate * db_size)
+            row_cost: -(cost_dec * dec_rate * db_size + leak_add + leak_mult * prob_uncaught * cost_exfil * exfil_rate * db_size)
             col_cost: prob_uncaught * cost_exfil * exfil_rate * db_size
         Abort:
             row_cost: -(cost_dec * dec_rate * db_size)
