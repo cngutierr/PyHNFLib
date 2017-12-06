@@ -262,7 +262,7 @@ class HNF(object):
             # 3. Calc result vars
             self.__create_const_var_from_random_var(self.sto_vars[HNF.Consts.GLOBAL_STO_RESULT_VARS])
 
-            print self.const_vars
+            #print self.const_vars
 
         def __verify_const_vars(self):
             for const_key in self.const_vars:
@@ -626,19 +626,24 @@ class HNF(object):
                 if hyperstrat_name == "MO":
                     results["Strategy Vector"] = self.calc_modeling_opponent_utility()
                     results["Expected Values"] = self.calc_expected_values()
+                    results["Expected Utility"] = self.calc_expected_utility(results["Expected Values"],
+                                                                             results["Strategy Vector"])
                 elif hyperstrat_name == "PS":
                     results["Strategy Vector"], _ = self.calc_pick_subgame_vector()
                     results["Expected Values"] = self.calc_expected_values()
+                    results["Expected Utility"] = self.calc_expected_utility(results["Expected Values"],
+                                                                             results["Strategy Vector"])
                 elif hyperstrat_name == "WS":
                     results["Strategy Vector"] = self.calc_weighted_subgame_vector()
                     results["Expected Values"] = self.calc_expected_values()
+                    results["Expected Utility"] = self.calc_expected_utility(results["Expected Values"],
+                                                                             results["Strategy Vector"])
                 elif hyperstrat_name == "NEMS":
                     # find the best sit
                     results["Strategy Vector"], sit = self.calc_pick_subgame_vector()
-                    results["Expected Values"] = self.calc_expected_values(sit)
+                    #results["Expected Values"] = self.calc_nems_expected_values(sit)
+                    results["Expected Utility"] = self.calc_nems_expected_value(sit)
 
-                results["Expected Utility"] = self.calc_expected_utility(results["Expected Values"],
-                                                                         results["Strategy Vector"])
                 results["Worst Case"] = self.calc_g(results["Strategy Vector"])
                 results["HEU"] = self.calc_heu(results["Expected Utility"],
                                                results["Worst Case"])
@@ -664,7 +669,7 @@ class HNF(object):
                     plot_data[hyperstrat_name] = [results[hyperstrat_name]["HEU"]] + plot_data[hyperstrat_name]
 
             plot_data["NEMS"] = [results["NEMS"]["Expected Utility"]] * 11
-            print plot_data["NEMS"]
+            #print plot_data["NEMS"]
 
             for hyperstrat_name in plot_data.keys():
                 plt.plot(np.arange(0.0, 1.1, step), plot_data[hyperstrat_name], label=hyperstrat_name)
@@ -739,8 +744,7 @@ class HNF(object):
                 Verify that the current belief is valid. The sum of current belief
                 values should be 1.0.
             """
-            assert sum(self.currentBelief.values()) >= 0.99 \
-                   and sum(self.currentBelief.values()) <= 1.0
+            assert sum(self.currentBelief.values()) >= 0.99 and sum(self.currentBelief.values()) <= 1.0
 
         def __get_worst_case_action(self, rowActionName):
             """
@@ -766,6 +770,7 @@ class HNF(object):
 
             for col_ind, col_name in enumerate(col_action_names):
                 for row_ind, row_name in enumerate(self.rowActionNames):
+                    #print self.costs_row
                     g[row_ind, col_ind][0] = int(self.costs_row[col_name][row_name])
                     # hack for now
                     g[row_ind, col_ind][1] = int(self.costs_column[col_name][row_name])
@@ -804,3 +809,9 @@ class HNF(object):
             s = solver.solve(game)
             # return the first nash equl.
             return dict(zip(self.rowActionNames, s[0][player]))
+
+        def calc_nems_expected_value(self, situation, player="Row Player"):
+            game = self.gambitGames[situation]
+            solver = gambit.nash.ExternalEnumMixedSolver()
+            s = solver.solve(game)
+            return s[0]._profile.payoff(game.players[0])
